@@ -17,8 +17,7 @@ SocketLink/
         └── googleSheetService.js # Lógica para comunicarse con Google Sheets
 ```
 
-da972a33fbecf78e
-
+```plaintext
 // io.sockets.adapter.rooms (es un Map)
 {
   // Salas explícitas que creaste con socket.join()
@@ -29,4 +28,4 @@ da972a33fbecf78e
   'sock_A'         => Set { 'sock_A' },
   'sock_B'         => Set { 'sock_B' },
   'sock_C'         => Set { 'sock_C' }
-}
+}```
