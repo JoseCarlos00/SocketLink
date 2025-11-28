@@ -1,40 +1,34 @@
+import type { AppSocket } from '../../types/socketInterface.d.ts';
 import { roomsName } from '../../../consts.js';
 import { activeConnections } from '../state.js';
 
-// Evento emitido desde app android -> `REGISTER_DEVICE`
-export function handleDeviceRegistration(socket, data) {
-	const { deviceId: device_id, currentIp: current_ip } = data;
+interface RegisterDevicePayload {
+	deviceId: string;
+	currentIp: string;
+}
 
-	if (!device_id) {
+export function handleDeviceRegistration(socket: AppSocket, data: RegisterDevicePayload) {
+	const { deviceId, currentIp } = data;
+
+	if (!deviceId) {
 		console.error('Error de registro: falta DEVICE_ID');
 		return;
 	}
 
-	socket.deviceId = device_id;
-	socket.join(device_id);
+	// Asignamos el deviceId a la propiedad personalizada del socket
+	socket.data.deviceId = deviceId;
+	socket.join(deviceId);
 	socket.join(roomsName.ANDROID_CLIENT);
 
-	activeConnections.set(device_id, socket.id);
-	console.log(`Dispositivo registrado: ${device_id} (IP: ${current_ip})`);
+	activeConnections.set(deviceId, socket.id);
+	console.log(`Dispositivo registrado: ${deviceId} (IP: ${currentIp})`);
 	console.log(`Conexiones activas: ${activeConnections.size}`);
 }
 
-// Evento emitido desde app android -> `DEVICE_INFO`
-export function handleDeviceInfo(socket, data) {
-	const { androidId: device_id, ipAddress, appVersion } = data;
 
-	if (!device_id) {
-		console.error('Error en handleDeviceInfo: androidId (DEVICE_ID) no fue proporcionado en el payload.');
-		return;
-	}
-
-	// Aquí puedes procesar la información recibida del dispositivo.
-	console.log(`Información recibida del dispositivo ${device_id}: IP=${ipAddress}, Version=${appVersion}`);
-}
-
-export function handleDeviceDisconnect(socket) {
-	if (socket.deviceId) {
-		activeConnections.delete(socket.deviceId);
-		console.log(`Dispositivo desconectado y eliminado: ${socket.deviceId}`);
+export function handleDeviceDisconnect(socket: AppSocket) {
+	if (socket.data.deviceId) {
+		activeConnections.delete(socket.data.deviceId);
+		console.log(`Dispositivo desconectado y eliminado: ${socket.data.deviceId}`);
 	}
 }

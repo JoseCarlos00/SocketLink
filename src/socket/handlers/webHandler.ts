@@ -1,34 +1,41 @@
-import { roomsName, typeClient } from "../../../consts.js";
-import { submittedEventsApp } from "../../../consts.js";
+import type { AppIO, AppSocket } from '../../types/socketInterface.d.ts';
+import { roomsName, submittedEventsApp, clientType } from '../../../consts.js';
 import { activeConnections, inventoryMaster } from '../state.js';
- 
-export function handleWebClientIdentification(socket, payload) {
-	// Se espera un payload como: { clientType: 'WEB' }
-	const type = payload ? payload.clientType : null;
- 
-	if (type === typeClient.WEB_CLIENT) {
+import type {
+	AlarmActivationPayload,
+	IdentifyClientPayload,
+	SendMessagePayload,
+	SendAllMessagePayload,
+	TargetedDevicePayload,
+	WebCallback,
+} from '../../types/payloadsGetWeb.d.ts';
+
+export function handleWebClientIdentification(socket: AppSocket, payload: IdentifyClientPayload) {
+	const type = payload?.clientType;
+
+	if (type === clientType.WEB) {
 		socket.join(roomsName.WEB_CLIENT);
 		console.log(`Cliente web ${socket.id} unido a la room '${roomsName.WEB_CLIENT}'`);
-		socket.emit('INVENTARIO_ACTUALIZADO', inventoryMaster);
+		// socket.emit('INVENTARIO_ACTUALIZADO', inventoryMaster);
 	}
 }
 
-export function handleAlarm(io, data, callback) {
-	const { target_device_id, durationSeconds, deviceAlias } = data;
-
+export function handleAlarm(
+	io: AppIO,
+	data: AlarmActivationPayload,
+	callback: WebCallback
+) {
+	const { target_device_id } = data;
+	
 	if (!target_device_id) {
 		console.error('Error en handleAlarm: target_device_id no fue proporcionado.');
 		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
 	}
 
-	const targetSocketId = activeConnections.get(target_device_id);
-
-	if (targetSocketId) {
+	if (activeConnections.has(target_device_id)) {
 		// Prepara el payload para el dispositivo, usando valores por defecto si no se proveen.
-		const payload = {
-			durationSeconds: durationSeconds || 10,
-			deviceAlias: deviceAlias || 'desconocido'
-		};
+		const { durationSeconds, deviceAlias } = data;
+		const payload = { durationSeconds, deviceAlias };
 
 		io.to(target_device_id).emit(submittedEventsApp.ALARM, payload);
 
@@ -40,7 +47,11 @@ export function handleAlarm(io, data, callback) {
 	}
 }
 
-export function handleSendMessage(io, data, callback) {
+export function handleSendMessage(
+	io: AppIO,
+	data: SendMessagePayload,
+	callback: WebCallback
+) {
 	const { target_device_id, dataMessage } = data;
 
 	if (!target_device_id) {
@@ -48,9 +59,7 @@ export function handleSendMessage(io, data, callback) {
 		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
 	}
 
-	const targetSocketId = activeConnections.get(target_device_id);
-
-	if (targetSocketId) {
+	if (activeConnections.has(target_device_id)) {
 		io.to(target_device_id).emit(submittedEventsApp.MESSAGE, dataMessage);
 
 		console.log(`Evento MESSAGE enviado a: ${target_device_id}`);
@@ -61,7 +70,11 @@ export function handleSendMessage(io, data, callback) {
 	}
 }
 
-export function handlePingAlarm(io, data, callback) {
+export function handlePingAlarm(
+	io: AppIO,
+	data: TargetedDevicePayload,
+	callback: WebCallback
+) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -69,9 +82,7 @@ export function handlePingAlarm(io, data, callback) {
 		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
 	}
 
-	const targetSocketId = activeConnections.get(target_device_id);
-
-	if (targetSocketId) {
+	if (activeConnections.has(target_device_id)) {
 		io.to(target_device_id).emit(submittedEventsApp.PING_ALARM);
 
 		console.log(`Evento ${submittedEventsApp.PING_ALARM} enviado a: ${target_device_id}`);
@@ -82,7 +93,11 @@ export function handlePingAlarm(io, data, callback) {
 	}
 }
 
-export function handleCheckForUpdate(io, data, callback) {
+export function handleCheckForUpdate(
+	io: AppIO,
+	data: TargetedDevicePayload,
+	callback: WebCallback
+) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -90,9 +105,7 @@ export function handleCheckForUpdate(io, data, callback) {
 		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
 	}
 
-	const targetSocketId = activeConnections.get(target_device_id);
-
-	if (targetSocketId) {
+	if (activeConnections.has(target_device_id)) {
 		io.to(target_device_id).emit(submittedEventsApp.CHECK_FOR_UPDATE);
 
 		console.log(`Evento ${submittedEventsApp.CHECK_FOR_UPDATE} enviado a: ${target_device_id}`);
@@ -103,7 +116,11 @@ export function handleCheckForUpdate(io, data, callback) {
 	}
 }
 
-export function handleGetDeviceInfo(io, data, callback) {
+export function handleGetDeviceInfo(
+	io: AppIO,
+	data: TargetedDevicePayload,
+	callback: WebCallback
+) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -111,10 +128,8 @@ export function handleGetDeviceInfo(io, data, callback) {
 		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
 	}
 
-	const targetSocketId = activeConnections.get(target_device_id);
-
-	if (targetSocketId) {
-		// El servidor pide la información y espera la respuesta en el callback
+	if (activeConnections.has(target_device_id)) {
+		// El servidor pide la información y espera la respuesta en el callback (si la app lo soporta)
 		io.to(target_device_id).emit(submittedEventsApp.GET_DEVICE_INFO, (response) => {
 			if (response && response.androidId) {
 				console.log('Respuesta recibida:', response);
@@ -133,7 +148,7 @@ export function handleGetDeviceInfo(io, data, callback) {
 
 /** difusión (broadcast) a una sala (room)  */
 
-export function handleCheckForAllUpdate(io, callback) {
+export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
 	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_CLIENT);
 
@@ -149,13 +164,17 @@ export function handleCheckForAllUpdate(io, callback) {
 	}
 }
 
-export function handleSendAllMessage(io, data, callback) {
+export function handleSendAllMessage(
+	io: AppIO,
+	payload: SendAllMessagePayload,
+	callback: WebCallback
+) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
 	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_CLIENT);
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_CLIENT).emit(submittedEventsApp.MESSAGE, data.dataMessage);
+		io.to(roomsName.ANDROID_CLIENT).emit(submittedEventsApp.MESSAGE, payload.dataMessage);
 
 		console.log(
 			`Evento ${submittedEventsApp.MESSAGE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_CLIENT}'.`

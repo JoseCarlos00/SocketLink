@@ -32,4 +32,5 @@ export interface DeviceInfoResponse {
 	ipAddress: string;
 	appVersion: string;
 }
+
 export type GetDeviceInfoAck = (info: DeviceInfoResponse | null) => void;
