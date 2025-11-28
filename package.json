@@ -1,11 +1,13 @@
 {
 	"name": "socket-link",
 	"version": "1.0.0",
-	"main": "server.js",
+	"main": "dist/server.js",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "node server.js"
+		"build": "tsc",
+		"start": "node dist/server.js",
+		"dev": "ts-node server.ts",
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Jose Carlos Aguirre Romero",
 	"license": "ISC",
