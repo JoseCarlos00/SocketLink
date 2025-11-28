@@ -1,0 +1,27 @@
+{
+	"name": "socket-link",
+	"version": "1.0.0",
+	"main": "server.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node server.js"
+	},
+	"author": "Jose Carlos Aguirre Romero",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"express": "^5.1.0",
+		"googleapis": "^105.0.0",
+		"socket.io": "^4.8.1"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.5",
+		"@types/node": "^24.10.1",
+		"@types/socket.io": "^3.0.1",
+		"@types/socket.io-client": "^1.4.36",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3",
+		"vite-plugin-checker": "^0.11.0"
+	}
+}
