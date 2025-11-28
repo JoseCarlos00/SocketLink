@@ -3,12 +3,12 @@ import { roomsName } from '../../../consts.js';
 import { activeConnections } from '../state.js';
 
 interface RegisterDevicePayload {
-	deviceId: string;
-	currentIp: string;
+	androidId: string;
+	ipAddress: string;
 }
 
 export function handleDeviceRegistration(socket: AppSocket, data: RegisterDevicePayload) {
-	const { deviceId, currentIp } = data;
+	const { androidId: deviceId, ipAddress } = data;
 
 	if (!deviceId) {
 		console.error('Error de registro: falta DEVICE_ID');
@@ -21,7 +21,7 @@ export function handleDeviceRegistration(socket: AppSocket, data: RegisterDevice
 	socket.join(roomsName.ANDROID_CLIENT);
 
 	activeConnections.set(deviceId, socket.id);
-	console.log(`Dispositivo registrado: ${deviceId} (IP: ${currentIp})`);
+	console.log(`Dispositivo registrado: ${deviceId} (IP: ${ipAddress})`);
 	console.log(`Conexiones activas: ${activeConnections.size}`);
 }
 

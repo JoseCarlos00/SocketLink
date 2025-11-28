@@ -4,7 +4,7 @@ export const receivedEventsApp = {
 
 export const submittedEventsApp = {
 	ALARM: 'ALARM',
-	PING_ALARM: 'PING_ALARM',
+	PING: 'PING',
 	MESSAGE: 'MESSAGE',
 	CHECK_FOR_UPDATE: 'CHECK_FOR_UPDATE',
 	GET_DEVICE_INFO: 'GET_DEVICE_INFO',
@@ -27,6 +27,10 @@ export const receivedEventWeb = {
 	GET_DEVICE_INFO: 'GET_DEVICE_INFO',
 	UPDATE_DEVICE_STATUS: 'UPDATE_DEVICE_STATUS',
 } as const;
+
+export const submittedEventWeb = {
+	INVENTARIO_ACTUALIZADO: 'INVENTARIO_ACTUALIZADO',
+};
 
 
 export const roomsName = {

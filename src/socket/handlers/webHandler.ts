@@ -83,9 +83,9 @@ export function handlePingAlarm(
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.PING_ALARM);
+		io.to(target_device_id).emit(submittedEventsApp.PING);
 
-		console.log(`Evento ${submittedEventsApp.PING_ALARM} enviado a: ${target_device_id}`);
+		console.log(`Evento ${submittedEventsApp.PING} enviado a: ${target_device_id}`);
 		callback({ status: 'OK', message: 'Ping de alarma enviado correctamente.' });
 	} else {
 		console.error(`Error en handlePingAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
@@ -131,8 +131,10 @@ export function handleGetDeviceInfo(
 	if (activeConnections.has(target_device_id)) {
 		// El servidor pide la información y espera la respuesta en el callback (si la app lo soporta)
 		io.to(target_device_id).emit(submittedEventsApp.GET_DEVICE_INFO, (response) => {
-			if (response && response.androidId) {
-				console.log('Respuesta recibida:', response);
+			const deviceInfo = Array.isArray(response) ? response[0] : response;
+
+			if (deviceInfo && deviceInfo.androidId) {
+				console.log('Respuesta recibida:', deviceInfo);
 			} else {
 				console.error('La app no pudo procesar la solicitud.');
 			}

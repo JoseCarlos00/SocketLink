@@ -14,7 +14,7 @@ import type { AlarmAck, AlarmPayload, GetDeviceInfoAck, MessagePayload, PingAlar
 export interface ServerToClientEvents {
 	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack?: AlarmAck) => void;
 
-	[submittedEventsApp.PING_ALARM]: (ack?: PingAlarmAck) => void;
+	[submittedEventsApp.PING]: (ack?: PingAlarmAck) => void;
 
 	[submittedEventsApp.MESSAGE]: (payload: MessagePayload) => void;
 
