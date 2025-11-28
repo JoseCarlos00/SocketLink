@@ -1,8 +1,8 @@
 import { receivedEventsApp, receivedEventWeb } from '../../consts.js';
-import { handleDeviceRegistration, handleDeviceInfo, handleGetDeviceInfo, handleDeviceDisconnect } from './handlers/deviceHandler.js';
+import { handleDeviceRegistration, handleDeviceInfo, handleDeviceDisconnect } from './handlers/deviceHandler.js';
 import {
 	handleWebClientIdentification,
-	handleAlarmActivation,
+	handleAlarm,
 	handleSendMessage,
 	handlePingAlarm,
 	handleCheckForUpdate,
@@ -22,7 +22,7 @@ export function initializeSocketLogic(io) {
 
 		// Eventos de clientes Web
 		socket.on(receivedEventWeb.IDENTIFY_CLIENT, (payload) => handleWebClientIdentification(socket, payload));
-		socket.on(receivedEventWeb.ALARM_ACTIVATION, (data, cb) => handleAlarmActivation(io, data, cb));
+		socket.on(receivedEventWeb.ALARM_ACTIVATION, (data, cb) => handleAlarm(io, data, cb));
 		socket.on(receivedEventWeb.SEND_MESSAGE, (data, cb) => handleSendMessage(io, data, cb));
 		socket.on(receivedEventWeb.SEND_PING, (data, cb) => handlePingAlarm(io, data, cb));
 		socket.on(receivedEventWeb.CHECK_FOR_UPDATE, (data, cb) => handleCheckForUpdate(io, data, cb));

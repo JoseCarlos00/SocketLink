@@ -1,6 +1,6 @@
 import express from 'express';
 import http from 'http';
-import { Server } from 'socket.io';
+import { Server as SocketIOServer } from 'socket.io';
 
 import { PORT, CORS_ORIGIN } from './config.js';
 import { updateInventory } from './src/socket/state.js';
@@ -8,24 +8,47 @@ import { initializeSocketLogic } from './src/socket/connection.js';
 import { createApiRoutes } from './src/api/routes.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
 
-// --- 1. Configuración del Servidor ---
+/**
+ * Configura y devuelve una instancia de la aplicación Express.
+ * @returns {express.Application} La aplicación Express configurada.
+ */
+function configureApp(): express.Application {
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
+	app.use(express.json());
+	return app;
+}
+
+/**
+ * Inicializa y configura Socket.IO en el servidor HTTP.
+ * @param {http.Server} server El servidor HTTP.
+ * @returns {SocketIOServer} La instancia de Socket.IO configurada.
+ */
+function configureSocketIO(server: http.Server): SocketIOServer {
+	const io = new SocketIOServer(server, {
 	cors: {
 		origin: CORS_ORIGIN,
 		methods: ['GET', 'POST'],
 	},
 });
+	return io;
+}
 
-// --- 2. Middlewares de Express ---
-app.use(express.json());
+const app = configureApp();
+
+/**
+ * Configura y devuelve un servidor HTTP con la aplicación Express.
+ * @param {express.Application} app La aplicación Express.
+ * @returns {http.Server} El servidor HTTP configurado.
+ */
+const server = http.createServer(app);
+
+const io = configureSocketIO(server);
+
+
 app.use('/api', createApiRoutes(io)); // Montar las rutas de la API
 
-// --- 3. Lógica de Socket.IO ---
 initializeSocketLogic(io);
 
-// --- 4. Inicio del Servidor ---
 async function startServer() {
 	try {
 		// Cargar inventario inicial
@@ -42,4 +65,5 @@ async function startServer() {
 	}
 }
 
+// Inicia el servidor
 startServer();
