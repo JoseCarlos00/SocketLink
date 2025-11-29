@@ -1,4 +1,5 @@
 import type { MessagePayload, AlarmPayload } from './payloadsSendApp.d.ts';
+import type { DeviceInfoResponse } from './payloadsSendApp.d.ts';
 
 /**
  * Interfaz para la respuesta del callback que se envía desde el servidor
@@ -7,6 +8,7 @@ import type { MessagePayload, AlarmPayload } from './payloadsSendApp.d.ts';
 export interface CallbackResponse {
 	status: 'OK' | 'ERROR' | 'WARN';
 	message: string;
+	data?: DeviceInfoResponse | Record<string, unknown>;
 }
 
 export type ClientType = 'WEB' | 'ANDROID';

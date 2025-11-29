@@ -20,7 +20,7 @@ export function handleWebClientIdentification(socket: AppSocket, payload: Identi
 	}
 }
 
-export function handleAlarm(io: AppIO, data: AlarmActivationPayload,callback: WebCallback) {
+export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: WebCallback) {
 	const { target_device_id } = data;
 	
 	if (!target_device_id) {
@@ -33,17 +33,24 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload,callback: We
 		const { durationSeconds, deviceAlias } = data;
 		const payload = { durationSeconds, deviceAlias };
 
-		io.to(target_device_id).emit(submittedEventsApp.ALARM, payload);
+		io.to(target_device_id).emit(submittedEventsApp.ALARM, payload, response => {
+			console.log('Respuesta recibida:', response);
+			if (response?.status === 'ERROR') {
+				callback({ status: 'ERROR', message: response?.reason! });
+				return;
+			}
+
+			callback({ status: 'OK', message: response?.status! });
+		});
 
 		console.log(`Evento ${submittedEventsApp.ALARM} enviado a ${target_device_id} con payload:`, payload);
-		callback({ status: 'OK', message: 'Alarma enviada correctamente.' });
 	} else {
 		console.error(`Error en handleAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
-export function handleSendMessage(io: AppIO,data: SendMessagePayload,callback: WebCallback) {
+export function handleSendMessage(io: AppIO,data: SendMessagePayload, callback: WebCallback) {
 	const { target_device_id, dataMessage } = data;
 
 	if (!target_device_id) {
@@ -52,7 +59,16 @@ export function handleSendMessage(io: AppIO,data: SendMessagePayload,callback: W
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.MESSAGE, dataMessage);
+		io.to(target_device_id).emit(submittedEventsApp.MESSAGE, dataMessage, response => {
+			console.log('Respuesta recibida:', response);
+			if (response?.status === 'ERROR') {
+				callback({ status: 'ERROR', message: response?.reason! });
+				return;
+			}
+
+			callback({ status: 'OK', message: response?.status! });
+		});
+
 
 		console.log(`Evento MESSAGE enviado a: ${target_device_id}`);
 		callback({ status: 'OK', message: 'Mensaje enviado correctamente.' });
@@ -62,7 +78,7 @@ export function handleSendMessage(io: AppIO,data: SendMessagePayload,callback: W
 	}
 }
 
-export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload,callback: WebCallback) {
+export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload, callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -75,12 +91,11 @@ export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload,callback: 
 			console.log('Respuesta recibida:', response);
 
 			if (response?.status === 'ERROR') {
-					callback({ status: 'ERROR', message: response?.reason});
+					callback({ status: 'ERROR', message: response?.reason!});
 					return;
 			}
 
-
-			callback({ status: 'OK', message: response?.status });
+			callback({ status: 'OK', message: response?.status! });
 		});
 
 		console.log(`Evento ${submittedEventsApp.PING} enviado a: ${target_device_id}`);
@@ -90,7 +105,7 @@ export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload,callback: 
 	}
 }
 
-export function handleCheckForUpdate(io: AppIO,data: TargetedDevicePayload,callback: WebCallback) {
+export function handleCheckForUpdate(io: AppIO,data: TargetedDevicePayload, callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -109,7 +124,7 @@ export function handleCheckForUpdate(io: AppIO,data: TargetedDevicePayload,callb
 	}
 }
 
-export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload,callback: WebCallback) {
+export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload, callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -124,20 +139,24 @@ export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload,callba
 
 			if (deviceInfo && deviceInfo.androidId) {
 				console.log('Respuesta recibida:', deviceInfo);
+				callback({ status: 'OK', message: 'Información del dispositivo obtenida.', data: deviceInfo });
 			} else {
 				console.error('La app no pudo procesar la solicitud.');
+				callback({
+					status: 'ERROR',
+					message: 'El dispositivo no respondió o la respuesta no fue válida.',
+				});
 			}
 		});
 
 		console.log(`Evento ${submittedEventsApp.GET_DEVICE_INFO} enviado a: ${target_device_id}`);
-		callback({ status: 'OK', message: 'Solicitud de información del dispositivo enviada.' });
 	} else {
 		console.error(`Error en handleGetDeviceInfo: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
-/** difusión (broadcast) a una sala (room)  */
+/** Difusión (broadcast) a una sala (room)  */
 
 export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
@@ -161,15 +180,23 @@ export function handleSendAllMessage(io: AppIO,payload: SendAllMessagePayload,ca
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_CLIENT).emit(submittedEventsApp.MESSAGE, payload.dataMessage);
+		io.to(roomsName.ANDROID_CLIENT).emit(submittedEventsApp.MESSAGE, payload.dataMessage, response => {
+			console.log('Respuesta recibida:', response);
+			if (response?.status === 'ERROR') {
+				callback({ status: 'ERROR', message: response?.reason! });
+				return;
+			};
+
+			callback({
+				status: 'OK',
+				message: `Mensajes Enviados a ${androidClientsRoom.size} dispositivos.`,
+			});
+		});
+
 
 		console.log(
 			`Evento ${submittedEventsApp.MESSAGE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_CLIENT}'.`
 		);
-		callback({
-			status: 'OK',
-			message: `Mensajes Enviados a ${androidClientsRoom.size} dispositivos.`,
-		});
 	} else {
 		console.warn(
 			`Se intentó enviar ${submittedEventsApp.MESSAGE} a la sala '${roomsName.ANDROID_CLIENT}', pero no hay dispositivos conectados.`

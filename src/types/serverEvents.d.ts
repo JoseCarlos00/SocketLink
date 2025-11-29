@@ -9,14 +9,14 @@ import type {
 	WebCallback,
 } from './payloadsGetWeb.d.ts';
 
-import type { AlarmAck, AlarmPayload, GetDeviceInfoAck, MessagePayload, PingAlarmAck } from './payloadsSendApp.d.ts';
+import type { AlarmAck, AlarmPayload, GetDeviceInfoAck, MessageAck, MessagePayload, PingAck } from './payloadsSendApp.d.ts';
 
 export interface ServerToClientEvents {
 	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack?: AlarmAck) => void;
 
-	[submittedEventsApp.PING]: (ack?: PingAlarmAck) => void;
+	[submittedEventsApp.PING]: (ack?: PingAck) => void;
 
-	[submittedEventsApp.MESSAGE]: (payload: MessagePayload) => void;
+	[submittedEventsApp.MESSAGE]: (payload: MessagePayload, ack?: MessageAck) => void;
 
 	[submittedEventsApp.CHECK_FOR_UPDATE]: () => void;
 
