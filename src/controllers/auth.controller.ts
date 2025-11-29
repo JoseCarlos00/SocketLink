@@ -74,8 +74,8 @@ export const logout = (_req: Request, res: Response) => {
 	try {
 		res.clearCookie('refreshToken', {
 			httpOnly: true,
-			sameSite: 'none',
-			secure: false,
+			sameSite: 'lax', // Debe coincidir con la configuración de la cookie al crearla
+			secure: false, // Debe coincidir con la configuración de la cookie al crearla
 		});
 		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
 	} catch (error) {
