@@ -20,11 +20,7 @@ export function handleWebClientIdentification(socket: AppSocket, payload: Identi
 	}
 }
 
-export function handleAlarm(
-	io: AppIO,
-	data: AlarmActivationPayload,
-	callback: WebCallback
-) {
+export function handleAlarm(io: AppIO, data: AlarmActivationPayload,callback: WebCallback) {
 	const { target_device_id } = data;
 	
 	if (!target_device_id) {
@@ -47,11 +43,7 @@ export function handleAlarm(
 	}
 }
 
-export function handleSendMessage(
-	io: AppIO,
-	data: SendMessagePayload,
-	callback: WebCallback
-) {
+export function handleSendMessage(io: AppIO,data: SendMessagePayload,callback: WebCallback) {
 	const { target_device_id, dataMessage } = data;
 
 	if (!target_device_id) {
@@ -70,11 +62,7 @@ export function handleSendMessage(
 	}
 }
 
-export function handlePingAlarm(
-	io: AppIO,
-	data: TargetedDevicePayload,
-	callback: WebCallback
-) {
+export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload,callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -83,21 +71,26 @@ export function handlePingAlarm(
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.PING);
+		io.to(target_device_id).emit(submittedEventsApp.PING, response => {
+			console.log('Respuesta recibida:', response);
+
+			if (response?.status === 'ERROR') {
+					callback({ status: 'ERROR', message: response?.reason});
+					return;
+			}
+
+
+			callback({ status: 'OK', message: response?.status });
+		});
 
 		console.log(`Evento ${submittedEventsApp.PING} enviado a: ${target_device_id}`);
-		callback({ status: 'OK', message: 'Ping de alarma enviado correctamente.' });
 	} else {
 		console.error(`Error en handlePingAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
-export function handleCheckForUpdate(
-	io: AppIO,
-	data: TargetedDevicePayload,
-	callback: WebCallback
-) {
+export function handleCheckForUpdate(io: AppIO,data: TargetedDevicePayload,callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -116,11 +109,7 @@ export function handleCheckForUpdate(
 	}
 }
 
-export function handleGetDeviceInfo(
-	io: AppIO,
-	data: TargetedDevicePayload,
-	callback: WebCallback
-) {
+export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload,callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -166,11 +155,7 @@ export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 	}
 }
 
-export function handleSendAllMessage(
-	io: AppIO,
-	payload: SendAllMessagePayload,
-	callback: WebCallback
-) {
+export function handleSendAllMessage(io: AppIO,payload: SendAllMessagePayload,callback: WebCallback) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
 	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_CLIENT);
 

@@ -1,19 +1,28 @@
 // ===== ALARM =====
+// Respuesta:
+export interface AlarmAck {
+	status: 'OK' | 'ERROR';
+	reason?: string;
+}
+
 export interface AlarmPayload {
 	durationSeconds?: number; // default 10
 	deviceAlias?: string; // default "desconocido"
 }
 
-// Respuesta de la app: true = éxito, false = fallo
-export type AlarmAck = (success: boolean) => void;
+// Respuesta:
+export interface AlarmResponse {
+	status: 'OK' | 'ERROR';
+	reason?: string;
+}
+export type AlarmAck = (success) => void;
 
 // ===== PING_ALARM =====
 // No payload
-// Respuesta: objeto con info del dispositivo o null
+// Respuesta:
 export interface PingAlarmResponse {
-	androidId: string;
-	ipAddress: string;
-	appVersion: string;
+	status: 'PONG' | 'ERROR';
+	reason?: string;
 }
 export type PingAlarmAck = (response: PingAlarmResponse | null) => void;
 

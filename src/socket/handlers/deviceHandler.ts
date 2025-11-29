@@ -1,11 +1,9 @@
 import type { AppSocket } from '../../types/socketInterface.d.ts';
 import { roomsName } from '../../../consts.js';
 import { activeConnections } from '../state.js';
+import { RegisterDevicePayload } from '../../types/payloadsGetApp.js'
 
-interface RegisterDevicePayload {
-	androidId: string;
-	ipAddress: string;
-}
+
 
 export function handleDeviceRegistration(socket: AppSocket, data: RegisterDevicePayload) {
 	const { androidId: deviceId, ipAddress } = data;
