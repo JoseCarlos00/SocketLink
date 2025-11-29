@@ -1,5 +1,7 @@
 # Socket Link
 
+## La documentación debe reflejar la estructura de tu código y la separación de responsabilidades
+
 | **Módulo/Proceso** | **Responsabilidad** | **Protocolo Principal** | **Documentación Recomendada** |
 | --- | --- | --- | --- |
 | **AlertScanner** | Comunicación en tiempo real (ALARM, PING, MESSAGE) y estado del dispositivo. | **WebSocket / Socket.IO** | Tu documentación actual (Eventos y ACKs). |

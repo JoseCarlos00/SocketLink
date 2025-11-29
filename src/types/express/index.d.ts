@@ -1,4 +1,4 @@
-import { type AuthPayload } from '../authPayload.d.ts';
+import { type AuthPayload } from '../user.d.ts';
 
 // Extiende la interfaz Request de Express para incluir la propiedad currentUser
 declare global {

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token.js';
-
-import type { AuthPayload } from '../types/authPayload.d.ts';
+import { User } from '../models/user.model.js';
+import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 
 export const login = async (req: Request, res: Response) => {
 	if (!req.body) {
@@ -16,28 +16,18 @@ export const login = async (req: Request, res: Response) => {
 
 	try {
 		// 1. Buscar al usuario por su nombre de usuario.
-		// Se usa .select('+password') porque en el schema lo marcamos con `select: false` por seguridad.
-		// const user = await UserModel.findOne({ username }).select('+password');
-    const user = {
-      id: "1",
-      username: "admin",
-      role: "admin",
-      name: "admin",
-      password: "admin"
-    }
+		const user = User.findByUsername(username) as UserType | undefined;
 
-		// 2. Si no se encuentra el usuario o la contraseña no coincide, devolver un error genérico.
-		// El método `comparePassword` está definido en `user.model.ts` y usa bcrypt.compare.
-		// if (!user || !(await user.comparePassword(password))) {
-		// 	return res.status(401).json({ error: 'Credenciales inválidas' });
-		// }
+		// 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error.
+		if (!user || !(await User.comparePassword(password, user.password_hash))) {
+			return res.status(401).json({ error: 'Credenciales inválidas' });
+		}
 
 		// 3. Crear el payload para los tokens con la información del usuario de la BD.
 		const payload: AuthPayload = {
-			id: user.id, // Aseguramos que usamos el ID correcto
+			id: user.id,
 			username: user.username,
 			role: user.role,
-			name: user.name,
 		};
 
 		const accessToken = generateAccessToken(payload);
@@ -67,12 +57,11 @@ export const refreshToken = (req: Request, res: Response) => {
 		const payload = verifyRefreshToken(token);
 		// Re-crear el payload para el nuevo access token
 		const newPayload: AuthPayload = {
-			id: payload.id,
+			id: Number(payload.id),
 			username: payload.username,
 			role: payload.role,
-			name: payload.name,
-			senderName: payload.senderName,
 		};
+
 		const accessToken = generateAccessToken(newPayload);
 		res.json({ accessToken, message: 'Token refrescado exitosamente' });
 	} catch (err) {
@@ -86,7 +75,7 @@ export const logout = (_req: Request, res: Response) => {
 		res.clearCookie('refreshToken', {
 			httpOnly: true,
 			sameSite: 'none',
-			secure: true,
+			secure: false,
 		});
 		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
 	} catch (error) {
