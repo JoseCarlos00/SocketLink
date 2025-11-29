@@ -3,8 +3,8 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
 import { config } from './src/config.js';
-import { initializeDatabase } from './src/models/db.js'
 import { updateInventory } from './src/socket/state.js';
+import { initializeDatabase } from './src/models/db.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';

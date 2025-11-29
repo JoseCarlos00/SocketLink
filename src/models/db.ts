@@ -6,7 +6,7 @@ const { DB_FILE_NAME } = config;
 // 1. Crear la instancia de la base de datos
 // 'options' es opcional, pero útil para depuración.
 const db = new Database(DB_FILE_NAME, {
-	verbose: console.log,
+	// verbose: console.log,
 });
 
 /**

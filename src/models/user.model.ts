@@ -16,6 +16,10 @@ export class User {
 		return bcrypt.compare(password, hash);
 	}
 
+	static async getAllUsers() {
+		const statement = db.prepare('SELECT * FROM users');
+		return statement.all();
+	}
 
 	static async hashPassword(password: string): Promise<string> {
 		return bcrypt.hash(password, salt);
