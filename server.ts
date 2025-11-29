@@ -7,6 +7,7 @@ import { updateInventory } from './src/socket/state.js';
 import { initializeSocketLogic } from './src/socket/connection.js';
 import { createApiRoutes } from './src/api/routes.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
+import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
 
 /**
  * Configura y devuelve una instancia de la aplicación Express.
@@ -24,7 +25,7 @@ const app = express();
  * @returns {SocketIOServer} La instancia de Socket.IO configurada.
  */
 function configureSocketIO(server: http.Server): SocketIOServer {
-	const io = new SocketIOServer(server, {
+	const io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
 	cors: {
 		origin: CORS_ORIGIN,
 		methods: ['GET', 'POST'],

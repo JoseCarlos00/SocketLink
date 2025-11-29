@@ -1,11 +1,10 @@
 import type { receivedEventsApp, submittedEventsApp, receivedEventWeb, submittedEventWeb } from '../../consts.js';
-import { Inventory } from './inventory.js'
+import type { Inventory } from './inventory.js';
 import type { RegisterDevicePayload, RegisterDeviceAck } from './payloadsGetApp.d.ts';
 import type {
 	AlarmActivationPayload,
 	IdentifyClientPayload,
 	SendMessagePayload,
-	SendAllMessagePayload,
 	TargetedDevicePayload,
 	WebCallback,
 } from './payloadsGetWeb.d.ts';
@@ -25,7 +24,7 @@ export interface ServerToClientEvents {
 	[submittedEventsApp.GET_DEVICE_INFO]: (ack: GetDeviceInfoAck) => void;
 
 	// Web
-	[submittedEventWeb.UPDATED_INVENTORY]: (inventory: Inventory[]) => void;
+	'UPDATED_INVENTORY': (inventory: Inventory[]) => void;
 }
 
 

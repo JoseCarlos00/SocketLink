@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { fetchInventoryFromGoogleSheet } from '../services/googleSheetService.js';
 import { updateInventory, inventoryMaster } from '../socket/state.js';
 import { API_SECRET_TOKEN } from '../../config.js';
-import { AppIO } from '../types/socketInterface.js'
+import type { AppIO } from '../types/socketInterface.js';
 import { roomsName, submittedEventWeb } from "../../consts.js";
 
 export function createApiRoutes(io: AppIO) {
@@ -18,7 +18,7 @@ export function createApiRoutes(io: AppIO) {
 			const newInventory = await fetchInventoryFromGoogleSheet();
 			updateInventory(newInventory);
 
-			io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.UPDATED_INVENTORY, inventoryMaster);
+			io.to(roomsName.WEB_CLIENT).emit('UPDATED_INVENTORY', inventoryMaster);
 
 			const webClientsCount = io.sockets.adapter.rooms.get(roomsName.WEB_CLIENT)?.size || 0;
 			console.log(`Inventario actualizado y notificado a ${webClientsCount} ${roomsName.WEB_CLIENT}.`);

@@ -1,5 +1,5 @@
 import type { AppIO, AppSocket } from '../../types/socketInterface.d.ts';
-import { roomsName, submittedEventsApp, clientType } from '../../../consts.js';
+import { roomsName, submittedEventsApp, clientType, submittedEventWeb } from '../../../consts.js';
 import { activeConnections, inventoryMaster } from '../state.js';
 import type {
 	AlarmActivationPayload,
@@ -16,7 +16,7 @@ export function handleWebClientIdentification(socket: AppSocket, payload: Identi
 	if (type === clientType.WEB) {
 		socket.join(roomsName.WEB_CLIENT);
 		console.log(`Cliente web ${socket.id} unido a la room '${roomsName.WEB_CLIENT}'`);
-		// socket.emit('INVENTARIO_ACTUALIZADO', inventoryMaster);
+		socket.emit('UPDATED_INVENTORY', inventoryMaster);
 	}
 }
 
@@ -87,7 +87,7 @@ export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload, callback:
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.PING, response => {
+		io.to(target_device_id).emit(submittedEventsApp.PING, null, response => {
 			console.log('Respuesta recibida:', response);
 
 			if (response?.status === 'ERROR') {
