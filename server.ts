@@ -13,6 +13,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from './src/types/ser
 // Import Routes
 import socketApiRoutes from './src/api/socket.route.js';
 import authApiRoutes from './src/api/auth.route.js';
+import { socketAuthMiddleware } from './src/middlewares/socket.auth.middleware.js';
 
 // 1. Inicializar la base de datos
 initializeDatabase();
@@ -52,6 +53,9 @@ const app = configureApp();
 const server = http.createServer(app);
 
 const io = configureSocketIO(server);
+
+// Aplicar middleware de autenticación a todas las conexiones de Socket.IO
+io.use(socketAuthMiddleware);
 
 // Routes
 app.use('/api',verifyToken, socketApiRoutes(io));
