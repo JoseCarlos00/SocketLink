@@ -1,5 +1,5 @@
 import type { AppIO, AppSocket } from '../../types/socketInterface.d.ts';
-import { roomsName, submittedEventsApp, clientType, submittedEventWeb } from '../../../consts.js';
+import { roomsName, submittedEventsApp, clientType, submittedEventWeb } from '../../consts.js';
 import { activeConnections, inventoryMaster } from '../state.js';
 import type {
 	AlarmActivationPayload,

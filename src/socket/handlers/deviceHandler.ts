@@ -1,5 +1,5 @@
 import type { AppSocket } from '../../types/socketInterface.d.ts';
-import { roomsName } from '../../../consts.js';
+import { roomsName } from '../../consts.js';
 import { activeConnections } from '../state.js';
 import type { RegisterDevicePayload, RegisterDeviceAck } from '../../types/payloadsGetApp.d.ts';
 

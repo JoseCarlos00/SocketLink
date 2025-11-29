@@ -1,4 +1,4 @@
-import type { receivedEventsApp, submittedEventsApp, receivedEventWeb, submittedEventWeb } from '../../consts.js';
+import type { receivedEventsApp, submittedEventsApp, receivedEventWeb, submittedEventWeb } from '../consts.ts';
 import type { Inventory } from './inventory.js';
 import type { RegisterDevicePayload, RegisterDeviceAck } from './payloadsGetApp.d.ts';
 import type {

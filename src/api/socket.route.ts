@@ -3,7 +3,7 @@ import { fetchInventoryFromGoogleSheet } from '../services/googleSheetService.js
 import { updateInventory, inventoryMaster } from '../socket/state.js';
 import { API_SECRET_TOKEN } from '../../config.js';
 import type { AppIO } from '../types/socketInterface.js';
-import { roomsName, submittedEventWeb } from "../../consts.js";
+import { roomsName, submittedEventWeb } from "../consts.js";
 
 export default function createApiRoutes(io: AppIO) {
 	const router = Router();

@@ -1,5 +1,5 @@
 import type { AppIO, AppSocket } from '../types/socketInterface.d.ts';
-import { receivedEventsApp, receivedEventWeb } from '../../consts.js';
+import { receivedEventsApp, receivedEventWeb } from '../consts.js';
 import {
 	handleDeviceDisconnect,
 	handleDeviceRegistration,
