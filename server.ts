@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
-import { PORT, CORS_ORIGIN } from './config.js';
+import { config } from './src/config.js';
 import { updateInventory } from './src/socket/state.js';
 import { initializeSocketLogic } from './src/socket/connection.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
@@ -31,7 +31,7 @@ const app = express();
 function configureSocketIO(server: http.Server): SocketIOServer {
 	const io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
 	cors: {
-		origin: CORS_ORIGIN,
+		origin: config.CORS_ORIGIN,
 		methods: ['GET', 'POST'],
 	},
 });
@@ -62,8 +62,8 @@ async function startServer() {
 		updateInventory(initialInventory);
 		console.log('Inventario inicial cargado.');
 
-		server.listen(PORT, () => {
-			console.log(`Servidor Socket.IO/Express escuchando en el puerto ${PORT}`);
+		server.listen(config.PORT, () => {
+			console.log(`Servidor Socket.IO/Express escuchando en el puerto ${config.PORT}`);
 		});
 	} catch (error) {
 		console.error('Error fatal al iniciar el servidor:', error);

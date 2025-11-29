@@ -1,6 +1,6 @@
 // src/utils/token.ts
 import jwt from 'jsonwebtoken';
-import { config } from '../config/config.js';
+import { config } from '../config.js';
 import type { AuthPayload } from '../types/authPayload.d.ts';
 
 export const generateAccessToken = (payload: AuthPayload): string => {
