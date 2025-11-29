@@ -25,18 +25,6 @@ export function initializeDatabase() {
         )
     `);
 	createUserTable.run();
-
-	// Opcional: Inserta un usuario administrador si la tabla está vacía
-	const userCount = db.prepare('SELECT COUNT(*) FROM users').get();
-	if (userCount['COUNT(*)'] === 0) {
-		console.log('[DB] Inicializando usuario administrador por defecto.');
-		// **IMPORTANTE:** En producción, esto debe hacerse con un hash real de bcrypt
-		db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)').run(
-			'admin',
-			'TEMP_HASH_REMPLAZAR',
-			'ADMIN'
-		);
-	}
 }
 
 // 2. Exportar la instancia de la base de datos para que otros módulos la usen
