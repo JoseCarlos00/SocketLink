@@ -1,6 +1,7 @@
 import { activeConnections } from '../socket/state.js';
+import { Inventory } from '../types/inventory.js'
 
-export async function fetchInventoryFromGoogleSheet() {
+export async function fetchInventoryFromGoogleSheet(): Promise<Inventory[]> {
 	// 🚨 Esta función es un placeholder 🚨
 	// Aquí va la lógica real para llamar a tu API que expone los datos de Google Sheet.
 	console.log('--- Llamando a la API de Google Sheet ---');

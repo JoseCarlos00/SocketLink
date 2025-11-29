@@ -4,3 +4,7 @@ export interface RegisterDevicePayload {
 	ipAddress: string;
 	appVersion: string;
 }
+
+export interface RegisterDeviceAck {
+	(response: { status: 'OK' | 'ERROR'; reason?: string } | null): void;
+}

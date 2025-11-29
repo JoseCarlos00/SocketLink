@@ -56,7 +56,7 @@ export function initializeSocketLogic(io: AppIO) {
 		console.log(`Cliente conectado: ${socket.id}`);
 
 		registerDeviceEventHandlers(socket);
-		// registerWebClientEventHandlers(socket, io);
+		registerWebClientEventHandlers(socket, io);
 
 		socket.on('disconnect', () => {
 			handleDeviceDisconnect(socket);

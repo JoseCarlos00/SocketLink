@@ -2,11 +2,13 @@ import { Router } from 'express';
 import { fetchInventoryFromGoogleSheet } from '../services/googleSheetService.js';
 import { updateInventory, inventoryMaster } from '../socket/state.js';
 import { API_SECRET_TOKEN } from '../../config.js';
+import { AppIO } from '../types/socketInterface.js'
+import { roomsName, submittedEventWeb } from "../../consts.js";
 
-export function createApiRoutes(io) {
+export function createApiRoutes(io: AppIO) {
 	const router = Router();
 
-	router.get('/actualizar-inventario-maestro', async (req, res) => {
+	router.get('/update-inventory-master', async (req, res) => {
 		const token = req.header('X-Auth-Token');
 		if (token !== API_SECRET_TOKEN) {
 			return res.status(401).send({ status: 'ERROR', message: 'Acceso no autorizado.' });
@@ -16,13 +18,13 @@ export function createApiRoutes(io) {
 			const newInventory = await fetchInventoryFromGoogleSheet();
 			updateInventory(newInventory);
 
-			io.to('web_clients').emit('INVENTARIO_ACTUALIZADO', inventoryMaster);
+			io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.UPDATED_INVENTORY, inventoryMaster);
 
-			const webClientsCount = io.sockets.adapter.rooms.get('web_clients')?.size || 0;
-			console.log(`Inventario actualizado y notificado a ${webClientsCount} clientes web.`);
+			const webClientsCount = io.sockets.adapter.rooms.get(roomsName.WEB_CLIENT)?.size || 0;
+			console.log(`Inventario actualizado y notificado a ${webClientsCount} ${roomsName.WEB_CLIENT}.`);
 
 			res.status(200).send({ status: 'OK', message: 'Inventario maestro actualizado.' });
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Fallo al actualizar el inventario:', error.message);
 			res.status(500).send({ status: 'ERROR', message: 'Error interno del servidor.' });
 		}

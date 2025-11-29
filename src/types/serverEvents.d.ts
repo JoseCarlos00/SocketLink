@@ -1,5 +1,6 @@
-import type { receivedEventsApp, submittedEventsApp, receivedEventWeb } from '../../consts.js';
-import type { RegisterDevicePayload } from './payloadsGetApp.d.ts';
+import type { receivedEventsApp, submittedEventsApp, receivedEventWeb, submittedEventWeb } from '../../consts.js';
+import { Inventory } from './inventory.js'
+import type { RegisterDevicePayload, RegisterDeviceAck } from './payloadsGetApp.d.ts';
 import type {
 	AlarmActivationPayload,
 	IdentifyClientPayload,
@@ -12,21 +13,25 @@ import type {
 import type { AlarmAck, AlarmPayload, GetDeviceInfoAck, MessageAck, MessagePayload, PingAck } from './payloadsSendApp.d.ts';
 
 export interface ServerToClientEvents {
+	// Android
 	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack?: AlarmAck) => void;
 
-	[submittedEventsApp.PING]: (ack?: PingAck) => void;
+	[submittedEventsApp.PING]: (payload: null, ack?: PingAck) => void;
 
 	[submittedEventsApp.MESSAGE]: (payload: MessagePayload, ack?: MessageAck) => void;
 
 	[submittedEventsApp.CHECK_FOR_UPDATE]: () => void;
 
 	[submittedEventsApp.GET_DEVICE_INFO]: (ack: GetDeviceInfoAck) => void;
+
+	// Web
+	[submittedEventWeb.UPDATED_INVENTORY]: (inventory: Inventory[]) => void;
 }
 
 
 export interface ClientToServerEvents {
 	// Android
-	[receivedEventsApp.REGISTER_DEVICE]: (payload: RegisterDevicePayload) => void;
+	[receivedEventsApp.REGISTER_DEVICE]: (payload: RegisterDevicePayload, ack?: RegisterDeviceAck) => void;
 
 	// Web
 	[receivedEventWeb.IDENTIFY_CLIENT]: (payload: IdentifyClientPayload) => void;
