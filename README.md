@@ -10,19 +10,25 @@
 
 ```plaintext
 SocketLink/
-├── server.js           # Punto de entrada principal
-├── config.js           # Variables de configuración (puerto, secretos)
-└── src/
-    ├── socket/
-    │   ├── connection.js   # Lógica principal de conexión de Socket.IO
-    │   ├── handlers/       # Manejadores para cada evento de socket
-    │   │   ├── deviceHandler.js
-    │   │   └── webHandler.js
-    │   └── state.js        # Estado en memoria (conexiones, inventario)
-    ├── api/
-    │   └── routes.js       # Rutas de la API de Express
-    └── services/
-        └── googleSheetService.js # Lógica para comunicarse con Google Sheets
+/src
+├── api/
+│   ├── auth.route.ts       // Define las rutas /auth/*, usa AuthController
+│   └── socket.route.ts     // Define otras rutas, usa otros controladores
+├── controllers/
+│   ├── auth.controller.ts  // Lógica para login, registro
+│   └── inventory.controller.ts // Lógica para manejar el inventario
+├── models/
+│   ├── user.model.ts       // Esquema/definición del usuario
+│   └── inventory.model.ts  // Esquema/definición del inventario
+├── services/
+│   └── googleSheetService.ts // Lógica para interactuar con Google Sheets
+├── socket/
+│   ├── connection.ts       // Lógica principal de conexión de socket (incluyendo middleware de auth)
+│   └── state.ts            // Manejo del estado en memoria
+└── types/
+    └── serverEvents.ts
+server.ts                   // Tu archivo principal
+config.ts
 ```
 
 ```plaintext

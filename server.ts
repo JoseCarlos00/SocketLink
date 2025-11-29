@@ -5,9 +5,13 @@ import { Server as SocketIOServer } from 'socket.io';
 import { PORT, CORS_ORIGIN } from './config.js';
 import { updateInventory } from './src/socket/state.js';
 import { initializeSocketLogic } from './src/socket/connection.js';
-import { createApiRoutes } from './src/api/routes.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
+
+// Import Routes
+import socketApiRoutes from './src/api/socket.route.js';
+import authApiRoutes from './src/api/auth.route.js';
+
 
 /**
  * Configura y devuelve una instancia de la aplicación Express.
@@ -45,8 +49,9 @@ const server = http.createServer(app);
 
 const io = configureSocketIO(server);
 
-
-app.use('/api', createApiRoutes(io)); // Montar las rutas de la API
+// Routes
+app.use('/api', socketApiRoutes(io));
+app.use('/api/auth', authApiRoutes);
 
 initializeSocketLogic(io);
 

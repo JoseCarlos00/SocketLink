@@ -5,7 +5,7 @@ import { API_SECRET_TOKEN } from '../../config.js';
 import type { AppIO } from '../types/socketInterface.js';
 import { roomsName, submittedEventWeb } from "../../consts.js";
 
-export function createApiRoutes(io: AppIO) {
+export default function createApiRoutes(io: AppIO) {
 	const router = Router();
 
 	router.get('/update-inventory-master', async (req, res) => {
