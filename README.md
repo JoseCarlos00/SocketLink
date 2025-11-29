@@ -1,5 +1,13 @@
 # Socket Link
 
+| **Módulo/Proceso** | **Responsabilidad** | **Protocolo Principal** | **Documentación Recomendada** |
+| --- | --- | --- | --- |
+| **AlertScanner** | Comunicación en tiempo real (ALARM, PING, MESSAGE) y estado del dispositivo. | **WebSocket / Socket.IO** | Tu documentación actual (Eventos y ACKs). |
+| **Auth & Access** | Gestión de usuarios, roles, login, y permisos de la App Web. | **HTTP / REST** | Nueva documentación (Endpoints, SQL/SQLite, Flujo de Login). |
+| **System API** | Endpoints HTTP para la administración (Ej: `/api/actualizar-inventario`). | **HTTP / REST** | Nueva documentación (Endpoints y Permisos). |
+
+* * *
+
 ```plaintext
 SocketLink/
 ├── server.js           # Punto de entrada principal
@@ -29,3 +37,5 @@ SocketLink/
   'sock_B'         => Set { 'sock_B' },
   'sock_C'         => Set { 'sock_C' }
 }```
+
+
