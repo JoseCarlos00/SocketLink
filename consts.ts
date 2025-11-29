@@ -30,7 +30,7 @@ export const receivedEventWeb = {
 
 export const submittedEventWeb = {
 	UPDATED_INVENTORY: 'UPDATED_INVENTORY',
-};
+} as const;
 
 
 export const roomsName = {

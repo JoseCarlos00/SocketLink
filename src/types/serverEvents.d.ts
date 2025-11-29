@@ -11,6 +11,8 @@ import type {
 
 import type { AlarmAck, AlarmPayload, GetDeviceInfoAck, MessageAck, MessagePayload, PingAck } from './payloadsSendApp.d.ts';
 
+type SubmittedEventWebKeys = keyof typeof submittedEventWeb;
+
 export interface ServerToClientEvents {
 	// Android
 	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack?: AlarmAck) => void;
@@ -24,7 +26,7 @@ export interface ServerToClientEvents {
 	[submittedEventsApp.GET_DEVICE_INFO]: (ack: GetDeviceInfoAck) => void;
 
 	// Web
-	'UPDATED_INVENTORY': (inventory: Inventory[]) => void;
+	[submittedEventWeb.UPDATED_INVENTORY]: (inventory: Inventory[]) => void;
 }
 
 
