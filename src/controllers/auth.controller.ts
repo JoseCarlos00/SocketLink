@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token.js';
 
-// import { UserModel } from '../models/user.model';
 import type { AuthPayload } from '../types/authPayload.d.ts';
 
 export const login = async (req: Request, res: Response) => {
@@ -18,21 +17,27 @@ export const login = async (req: Request, res: Response) => {
 	try {
 		// 1. Buscar al usuario por su nombre de usuario.
 		// Se usa .select('+password') porque en el schema lo marcamos con `select: false` por seguridad.
-		const user = await UserModel.findOne({ username }).select('+password');
+		// const user = await UserModel.findOne({ username }).select('+password');
+    const user = {
+      id: "1",
+      username: "admin",
+      role: "admin",
+      name: "admin",
+      password: "admin"
+    }
 
 		// 2. Si no se encuentra el usuario o la contraseña no coincide, devolver un error genérico.
 		// El método `comparePassword` está definido en `user.model.ts` y usa bcrypt.compare.
-		if (!user || !(await user.comparePassword(password))) {
-			return res.status(401).json({ error: 'Credenciales inválidas' });
-		}
+		// if (!user || !(await user.comparePassword(password))) {
+		// 	return res.status(401).json({ error: 'Credenciales inválidas' });
+		// }
 
 		// 3. Crear el payload para los tokens con la información del usuario de la BD.
 		const payload: AuthPayload = {
-			id: user._id.toString() || user.id, // Aseguramos que usamos el ID correcto
+			id: user.id, // Aseguramos que usamos el ID correcto
 			username: user.username,
 			role: user.role,
 			name: user.name,
-			senderName: user.senderName,
 		};
 
 		const accessToken = generateAccessToken(payload);
@@ -41,7 +46,7 @@ export const login = async (req: Request, res: Response) => {
 		res.cookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			sameSite: 'none',
-			secure: true, // Usar `secure: true` solo en producción (HTTPS)
+			secure: false,
 			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
 		});
 
@@ -94,13 +99,13 @@ export const registerUser = async (req: Request, res: Response) => {
 	try {
 		const { username } = req.body;
 
-		const usernameExists = await UserModel.findOne({ username });
+		// const usernameExists = await UserModel.findOne({ username });
 
-		if (!usernameExists) return res.status(400).json({ message: 'Username already exists' });
+		// if (!usernameExists) return res.status(400).json({ message: 'Username already exists' });
 
-		const newUser = new UserModel(req.body);
-		await newUser.save();
-		res.status(201).json(newUser);
+		// const newUser = new UserModel(req.body);
+		// await newUser.save();
+		res.status(201).json('Nuevo Usuario');
 	} catch (error) {
 		console.error('Error al registrar el usuario:', error);
 		res.status(500).json({ message: 'Error interno del servidor' });
