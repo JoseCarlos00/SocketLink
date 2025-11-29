@@ -21,6 +21,11 @@ export class User {
 		return statement.all();
 	}
 
+	static async findById(id: number) {
+		const statement = db.prepare('SELECT * FROM users WHERE id = ?');
+		return statement.get(id);
+	}
+
 	static async hashPassword(password: string): Promise<string> {
 		return bcrypt.hash(password, salt);
 	}

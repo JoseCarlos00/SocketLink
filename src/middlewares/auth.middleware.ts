@@ -5,7 +5,7 @@ export const checkAdminRole = (req: Request, res: Response, next: NextFunction) 
 	const user = req.currentUser;
 
 	// 2. Verificar si el usuario existe y si su rol es 'admin'
-	if (!user || user.role !== 'admin') {
+	if (!user || user.role !== 'ADMIN') {
 		return res.status(403).json({ message: 'Acceso denegado: solo para administradores.' });
 	}
 

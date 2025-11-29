@@ -1,19 +1,16 @@
 import { Router } from 'express';
+import { roomsName, submittedEventWeb } from "../consts.js";
+
 import { fetchInventoryFromGoogleSheet } from '../services/googleSheetService.js';
 import { updateInventory, inventoryMaster } from '../socket/state.js';
-import { config } from '../config.js';
+import { checkAdminRole } from '../middlewares/auth.middleware.js';
+import { verifyToken } from '../middlewares/verifyToken.js';
 import type { AppIO } from '../types/socketInterface.js';
-import { roomsName, submittedEventWeb } from "../consts.js";
 
 export default function createApiRoutes(io: AppIO) {
 	const router = Router();
 
-	router.get('/update-inventory-master', async (req, res) => {
-		const token = req.header('X-Auth-Token');
-		if (token !== config.API_SECRET_TOKEN) {
-			return res.status(401).send({ status: 'ERROR', message: 'Acceso no autorizado.' });
-		}
-
+	router.get('/update-inventory-master', checkAdminRole, async (req, res) => {
 		try {
 			const newInventory = await fetchInventoryFromGoogleSheet();
 			updateInventory(newInventory);

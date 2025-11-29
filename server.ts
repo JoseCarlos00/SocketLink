@@ -7,6 +7,7 @@ import { updateInventory } from './src/socket/state.js';
 import { initializeDatabase } from './src/models/db.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
+import { verifyToken } from './src/middlewares/verifyToken.js'
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
 
 // Import Routes
@@ -53,7 +54,7 @@ const server = http.createServer(app);
 const io = configureSocketIO(server);
 
 // Routes
-app.use('/api', socketApiRoutes(io));
+app.use('/api',verifyToken, socketApiRoutes(io));
 app.use('/api/auth', authApiRoutes);
 
 initializeSocketLogic(io);
