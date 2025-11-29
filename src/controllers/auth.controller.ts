@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token.js';
-import { User } from '../models/user.model.js';
+import { User as UserModel } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 
 export const login = async (req: Request, res: Response) => {
@@ -16,10 +16,10 @@ export const login = async (req: Request, res: Response) => {
 
 	try {
 		// 1. Buscar al usuario por su nombre de usuario.
-		const user = User.findByUsername(username) as UserType | undefined;
+		const user = UserModel.findByUsername(username) as UserType | undefined;
 
 		// 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error.
-		if (!user || !(await User.comparePassword(password, user.password_hash))) {
+		if (!user || !(await UserModel.comparePassword(password, user.password_hash))) {
 			return res.status(401).json({ error: 'Credenciales inválidas' });
 		}
 
@@ -35,7 +35,7 @@ export const login = async (req: Request, res: Response) => {
 
 		res.cookie('refreshToken', refreshToken, {
 			httpOnly: true,
-			sameSite: 'none',
+			sameSite: 'lax',
 			secure: false,
 			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
 		});
@@ -86,15 +86,28 @@ export const logout = (_req: Request, res: Response) => {
 
 export const registerUser = async (req: Request, res: Response) => {
 	try {
-		const { username } = req.body;
+		const { username, password, role } = req.body;
 
-		// const usernameExists = await UserModel.findOne({ username });
+		// 1. Validar que los campos requeridos estén presentes.
+		if (!username || !password || !role) {
+			return res.status(400).json({ message: 'Username, password y role son requeridos.' });
+		}
 
-		// if (!usernameExists) return res.status(400).json({ message: 'Username already exists' });
+		if(role !== 'ADMIN' && role !== 'USER') {
+			return res.status(400).json({ message: 'El rol debe ser ADMIN o USER.' });
+		}
 
-		// const newUser = new UserModel(req.body);
-		// await newUser.save();
-		res.status(201).json('Nuevo Usuario');
+		// 2. Verificar si el nombre de usuario ya existe.
+		const usernameExists = await UserModel.findByUsername(username);
+
+		if (usernameExists) {
+			return res.status(409).json({ message: 'El nombre de usuario ya existe.' }); // 409 Conflict es más apropiado aquí.
+		}
+
+		// 3. Guardar el nuevo usuario.
+		await UserModel.create({ username, password, role });
+
+		res.status(201).json({ message: 'Nuevo Usuario registrado con éxito.' });
 	} catch (error) {
 		console.error('Error al registrar el usuario:', error);
 		res.status(500).json({ message: 'Error interno del servidor' });

@@ -20,5 +20,5 @@ export const config = {
 	API_SECRET_TOKEN: getEnvVar('API_SECRET_TOKEN'),
 
 	// Nombre del archivo de la base de datos SQLite
-	DB_FILE_NAME: 'alertscanner.db',
+	DB_FILE_NAME: getEnvVar('DB_FILE_NAME'),
 };
