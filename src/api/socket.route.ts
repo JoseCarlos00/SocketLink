@@ -10,7 +10,7 @@ import type { AppIO } from '../types/socketInterface.js';
 export default function createApiRoutes(io: AppIO) {
 	const router = Router();
 
-	router.get('/update-inventory-master', checkAdminRole, async (req, res) => {
+	router.get('admin/update-inventory-master', checkAdminRole, async (req, res) => {
 		try {
 			const newInventory = await fetchInventoryFromGoogleSheet();
 			updateInventory(newInventory);

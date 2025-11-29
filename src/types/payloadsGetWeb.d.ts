@@ -6,7 +6,7 @@ import type { DeviceInfoResponse } from './payloadsSendApp.d.ts';
  * al cliente web después de procesar un evento.
  */
 export interface CallbackResponse {
-	status: 'OK' | 'ERROR' | 'WARN';
+	status: 'OK' | 'ERROR' | 'WARN' | 'FORBIDDEN' | 'UNAUTHORIZED';
 	message: string;
 	data?: DeviceInfoResponse | Record<string, unknown>;
 }

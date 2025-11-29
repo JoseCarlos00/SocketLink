@@ -17,6 +17,7 @@ import {
 } from './handlers/webHandler.js';
 
 import type { RegisterDevicePayload } from '../types/payloadsGetApp.d.ts'
+import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
 
 function registerDeviceEventHandlers(socket: AppSocket) {
 	socket.on(receivedEventsApp.REGISTER_DEVICE, (data: RegisterDevicePayload) =>
@@ -30,47 +31,35 @@ function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
 		return;
 	}
 
-	socket.on(receivedEventWeb.IDENTIFY_CLIENT, (payload) =>
-		handleWebClientIdentification(socket, payload)
-	);
 
-	socket.on(receivedEventWeb.ALARM_ACTIVATION, (data, cb) =>
-		handleAlarm(io, data, cb)
-	);
-
-	socket.on(receivedEventWeb.SEND_MESSAGE, (data, cb) =>
-		handleSendMessage(io, data, cb)
-	);
-
-	socket.on(receivedEventWeb.SEND_PING, (data, cb) =>
-		handlePingAlarm(io, data, cb)
-	);
-
-	socket.on(receivedEventWeb.CHECK_FOR_UPDATE, (data, cb) => {
+	const verifyAdminRole = (cb: WebCallback): boolean => {
 		if (socket.currentUser?.role !== 'ADMIN') {
-			return cb?.({ status: 'ERROR', message: 'Acceso denegado: solo para administradores.' });
+			cb?.({ status: 'FORBIDDEN', message: 'Acceso denegado: solo para administradores.' });
+			return true;
 		}
 
+		return false;
+	};
+
+	socket.on(receivedEventWeb.IDENTIFY_CLIENT, (payload) => handleWebClientIdentification(socket, payload));
+	socket.on(receivedEventWeb.ALARM_ACTIVATION, (data, cb) => handleAlarm(io, data, cb));
+	socket.on(receivedEventWeb.SEND_MESSAGE, (data, cb) => handleSendMessage(io, data, cb));
+	socket.on(receivedEventWeb.SEND_PING, (data, cb) => handlePingAlarm(io, data, cb));
+	socket.on(receivedEventWeb.GET_DEVICE_INFO, (data, cb) => handleGetDeviceInfo(io, data, cb));
+
+	socket.on(receivedEventWeb.CHECK_FOR_UPDATE, (data, cb) => {
+		if (verifyAdminRole(cb)) return;
 		handleCheckForUpdate(io, data, cb);
 	});
 
-	socket.on(receivedEventWeb.GET_DEVICE_INFO, (data, cb) =>
-		handleGetDeviceInfo(io, data, cb)
-	);
 
 	socket.on(receivedEventWeb.CHECK_FOR_ALL_UPDATE, (cb) => {
-		if (socket.currentUser?.role !== 'ADMIN') {
-			return cb?.({ status: 'ERROR', message: 'Acceso denegado: solo para administradores.' });
-		}
-
+		if (verifyAdminRole(cb)) return;
 		handleCheckForAllUpdate(io, cb);
 	});
 
 	socket.on(receivedEventWeb.SEND_ALL_MESSAGE, (data, cb) => {
-		if (socket.currentUser?.role !== 'ADMIN') {
-			return cb?.({ status: 'ERROR', message: 'Acceso denegado: solo para administradores.' });
-		}
-
+		if (verifyAdminRole(cb)) return;
 		handleSendAllMessage(io, data, cb);
 	});
 }
