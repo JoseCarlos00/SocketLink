@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token.js';
-import { User as UserModel } from '../models/user.model.js';
+import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 
 export const login = async (req: Request, res: Response) => {
@@ -19,7 +19,7 @@ export const login = async (req: Request, res: Response) => {
 		const user = UserModel.findByUsername(username) as UserType | undefined;
 
 		// 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error.
-		if (!user || !(await UserModel.comparePassword(password, user.password_hash))) {
+		if (!user || !(await Bcrypt.comparePassword(password, user.password_hash))) {
 			return res.status(401).json({ message: 'Credenciales inválidas' });
 		}
 

@@ -5,39 +5,45 @@ import type { User as UserType } from "../types/user.d.ts";
 const salt = await bcrypt.genSalt(10)
 
 export class User {
+	static create(user: Omit<UserType, 'id'>) {
+		const statement = db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)');
+		statement.run(user.username, user.password_hash, user.role);
+	}
+
+	static delete(id: number): number {
+		const statement = db.prepare('DELETE FROM users WHERE id = ?');
+		const info = statement.run(id);
+		return info.changes;
+	}
+
 	static findByUsername(username: string) {
-		// Usamos .get() porque esperamos una sola fila
 		const statement = db.prepare('SELECT * FROM users WHERE username = ?');
-		return statement.get(username);
+		return statement.get(username) as UserType | undefined;;
 	}
 
-	static async comparePassword(password: string, hash: string): Promise<boolean> {
-		// Lógica de comparación con bcrypt (que es asíncrona)
-		return bcrypt.compare(password, hash);
-	}
-
-	static async getAllUsers() {
-		const statement = db.prepare('SELECT * FROM users');
-		return statement.all();
-	}
-
-	static async findById(id: number) {
+	static  findById(id: number) {
 		const statement = db.prepare('SELECT * FROM users WHERE id = ?');
-		return statement.get(id);
+		return statement.get(id) as UserType | undefined;
 	}
 
+	static getAllUsers() {
+		const statement = db.prepare('SELECT * FROM users');
+		return statement.all() as UserType[] | undefined;
+	}
+
+	static update(id: number, user: Omit<UserType, 'id'>): number {
+		const statement = db.prepare('UPDATE users SET username = ?, password_hash = ?, role = ? WHERE id = ?');
+		const info = statement.run(user.username, user.password_hash, user.role, id);
+		return info.changes;
+	}
+}
+
+export class Bcrypt {
 	static async hashPassword(password: string): Promise<string> {
 		return bcrypt.hash(password, salt);
 	}
 
-	/**
-	 * Crea un nuevo usuario en la base de datos.
-	 * Se encarga de hashear la contraseña antes de guardarla.
-	 * @param user - Objeto con los datos del usuario a crear. La contraseña debe estar en texto plano.
-	 */
-	static async create(user: Omit<UserType, 'id'>) {
-
-		const statement = db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)');
-		statement.run(user.username, user.password_hash, user.role);
+	static async comparePassword(password: string, hash: string): Promise<boolean> {
+		return bcrypt.compare(password, hash);
 	}
 }
