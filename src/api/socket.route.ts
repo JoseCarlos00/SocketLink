@@ -4,7 +4,6 @@ import { roomsName, submittedEventWeb } from "../consts.js";
 import { fetchInventoryFromGoogleSheet } from '../services/googleSheetService.js';
 import { updateInventory, inventoryMaster } from '../socket/state.js';
 import { checkAdminRole } from '../middlewares/auth.middleware.js';
-import { verifyToken } from '../middlewares/verifyToken.js';
 import type { AppIO } from '../types/socketInterface.js';
 
 export default function createApiRoutes(io: AppIO) {

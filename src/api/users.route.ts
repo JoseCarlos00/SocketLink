@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { User as UserModel } from '../models/user.model.js';
-import { registerUser } from '../controllers/auth.controller.js';
+import { registerUser } from '../controllers/users.controller.js';
 
 // Root: /api/admin/users
 const router = Router();

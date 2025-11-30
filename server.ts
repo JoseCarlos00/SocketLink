@@ -62,8 +62,8 @@ const io = configureSocketIO(server);
 io.use(socketAuthMiddleware);
 
 // Routes
-app.use('/api/socket', verifyToken, socketApiRoutes(io));
 app.use('/api/auth', authApiRoutes);
+app.use('/api/socket', verifyToken, socketApiRoutes(io));
 app.use('/api/admin/users', verifyToken, checkAdminRole, usersApiRoutes);
 
 initializeSocketLogic(io);
