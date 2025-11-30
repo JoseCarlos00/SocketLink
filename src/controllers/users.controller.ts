@@ -13,10 +13,30 @@ export const getAllUsers = async (req: Request, res: Response) => {
 	try {
 		const users = UserModel.getAllUsers();
 
-		if (users && (users.length > 0)) {
+		if (users && users.length > 0) {
 			res.json(users);
 		} else {
 			res.status(404).json({ message: 'No se encontraron usuarios.' });
+		}
+	} catch (error) {
+		res.status(500).json({ message: 'Error interno del servidor' });
+	}
+};
+
+export const getUserById = async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		const userId = Number(id);
+
+		if (isNaN(userId)) {
+			return res.status(400).json({ message: 'El ID debe ser un número.' });
+		}
+
+		const user = UserModel.findById(userId);
+		if (user) {
+			res.json(user);
+		} else {
+			res.status(404).json({ message: 'Usuario no encontrado' });
 		}
 	} catch (error) {
 		res.status(500).json({ message: 'Error interno del servidor' });
@@ -86,22 +106,22 @@ export const updateUser = async (req: Request, res: Response) => {
 			return res.status(400).json({ message: 'El ID debe ser un número.' });
 		}
 
-		const userToUpdate = UserModel.findById(userId);
-
-		if (!userToUpdate) {
-			return res.status(404).json({ message: 'Usuario no encontrado' });
-		}
-
 		const { username, role } = req.body as UpdateUser;
 
-			if (!username && !role) {
-				return res.status(400).json({ message: 'No se proporcionaron datos para actualizar.' });
-			}
+		if (!username && !role) {
+			return res.status(400).json({ message: 'No se proporcionaron datos para actualizar.' });
+		}
 
 		if (req.body.password) {
 			return res.status(400).json({
 				message: 'Para cambiar la contraseña, utiliza el endpoint dedicado.',
 			});
+		}
+
+		const userToUpdate = UserModel.findById(userId);
+
+		if (!userToUpdate) {
+			return res.status(404).json({ message: 'Usuario no encontrado' });
 		}
 
 		if (username) {
@@ -124,7 +144,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
 		UserModel.update(userId, updateData);
 
-		res.status(200).json({ message: 'Usuario actualizado con éxito.'});
+		res.status(200).json({ message: 'Usuario actualizado con éxito.' });
 	} catch (error) {
 		console.error('Error al actualizar el usuario:', error);
 		res.status(500).json({ message: 'Error interno del servidor' });
@@ -135,18 +155,38 @@ export const updatePassword = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const userId = Number(id);
+
+		if (isNaN(userId)) {
+			return res.status(400).json({ message: 'El ID debe ser un número.' });
+		}
+
 		const { oldPassword, newPassword } = req.body;
 
-		// Lógica para actualizar la contraseña...
-		// 1. Validar que el ID es un número.
-		// 2. Validar que oldPassword y newPassword existen.
-		// 3. Buscar el usuario por ID.
-		// 4. Verificar que la `oldPassword` coincide con la contraseña hasheada en la BD (usando Bcrypt.comparePassword).
-		// 5. Hashear la `newPassword`.
-		// 6. Actualizar la contraseña en la base de datos.
-		// 7. Enviar una respuesta exitosa (ej. 204 No Content).
+		if (!oldPassword || !newPassword) {
+			return res.status(400).json({ message: 'Se requieren la contraseña anterior y la nueva.' });
+		}
 
-		res.status(501).json({ message: 'Funcionalidad no implementada todavía.' });
+		if (oldPassword === newPassword) {
+			return res.status(409).json({ message: 'La nueva contraseña no puede ser igual a la anterior.' });
+		}
+
+		const userToUpdate = UserModel.findById(userId);
+
+		if (!userToUpdate) {
+			return res.status(404).json({ message: 'Usuario no encontrado' });
+		}
+
+		const passwordIsCorrect = await Bcrypt.comparePassword(oldPassword, userToUpdate.password_hash);
+
+		if (!passwordIsCorrect) {
+			return res.status(401).json({ message: 'La contraseña actual es incorrecta.' });
+		}
+
+		const newPasswordHashed = await Bcrypt.hashPassword(newPassword);
+
+		UserModel.updatePassword(userId, newPasswordHashed);
+
+		res.status(204).send();
 	} catch (error) {
 		console.error('Error al actualizar la contraseña:', error);
 		res.status(500).json({ message: 'Error interno del servidor' });
