@@ -1,31 +1,14 @@
 import { Router } from 'express';
 import { User as UserModel } from '../models/user.model.js';
-import { registerUser } from '../controllers/users.controller.js';
+import { registerUser, deleteUser, updatePassword, updateUser, getAllUsers } from '../controllers/users.controller.js';
 
 // Root: /api/admin/users
 const router = Router();
 
-
-// POST /api/admin/users
+router.get('/', getAllUsers);
 router.post('/', registerUser);
-
-// GET /api/admin/users - Obtiene todos los usuarios
-router.get('/', async (_, res) => {
-	try {
-    const users = await UserModel.getAllUsers();
-    
-    if (users) {
-			res.json(users);
-    } else {
-      res.status(404).json({ message: 'No se encontraron usuarios.' });
-    }
-
-  } catch (error) {
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-});
-
-// --- Rutas futuras para CRUD ---
+router.patch('/:id', updateUser);
+router.delete('/:id', deleteUser);
 
 // GET /api/admin/users/:id - Obtener un usuario por ID
 router.get('/:id', (req, res) => {
@@ -41,14 +24,5 @@ router.get('/:id', (req, res) => {
 	}
 });
 
-// PUT /api/admin/users/:id - Actualizar un usuario por ID
-router.put('/:id', (req, res) => {
-	res.status(501).json({ message: 'Funcionalidad no implementada todavía.', id: req.params.id });
-});
-
-// DELETE /api/admin/users/:id - Borrar un usuario por ID
-router.delete('/:id', (req, res) => {
-	res.status(501).json({ message: 'Funcionalidad no implementada todavía.', id: req.params.id });
-});
 
 export default router;

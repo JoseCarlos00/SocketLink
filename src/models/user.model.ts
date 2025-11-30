@@ -10,7 +10,7 @@ export class User {
 		statement.run(user.username, user.password_hash, user.role);
 	}
 
-	static delete(id: number): number {
+	static deleteById(id: number): number {
 		const statement = db.prepare('DELETE FROM users WHERE id = ?');
 		const info = statement.run(id);
 		return info.changes;
@@ -18,10 +18,10 @@ export class User {
 
 	static findByUsername(username: string) {
 		const statement = db.prepare('SELECT * FROM users WHERE username = ?');
-		return statement.get(username) as UserType | undefined;;
+		return statement.get(username) as UserType | undefined;
 	}
 
-	static  findById(id: number) {
+	static findById(id: number) {
 		const statement = db.prepare('SELECT * FROM users WHERE id = ?');
 		return statement.get(id) as UserType | undefined;
 	}
@@ -31,9 +31,21 @@ export class User {
 		return statement.all() as UserType[] | undefined;
 	}
 
-	static update(id: number, user: Omit<UserType, 'id'>): number {
+	static updateById(id: number, user: Omit<UserType, 'id'>): number {
 		const statement = db.prepare('UPDATE users SET username = ?, password_hash = ?, role = ? WHERE id = ?');
 		const info = statement.run(user.username, user.password_hash, user.role, id);
+		return info.changes;
+	}
+
+	static updatePassword(id: number, password_hash: string): number {
+		const statement = db.prepare('UPDATE users SET password_hash = ? WHERE id = ?');
+		const info = statement.run(password_hash, id);
+		return info.changes;
+	}
+
+	static update(id: number, user: Omit<UserType, 'id' | 'password_hash'>): number {
+		const statement = db.prepare('UPDATE users SET username = ?, role = ? WHERE id = ?');
+		const info = statement.run(user.username, user.role, id);
 		return info.changes;
 	}
 }
