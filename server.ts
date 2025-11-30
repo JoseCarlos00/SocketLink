@@ -1,12 +1,15 @@
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import swaggerUi from 'swagger-ui-express'
 
+import swaggerSpec  from './src/swagger.js';
 import { config } from './src/config.js';
 import { updateInventory } from './src/socket/state.js';
 import { initializeDatabase } from './src/models/db.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
+
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
 
 // Import Middlewares
@@ -62,9 +65,12 @@ const io = configureSocketIO(server);
 io.use(socketAuthMiddleware);
 
 // Routes
+
 app.use('/api/auth', authApiRoutes);
 app.use('/api/socket', verifyToken, socketApiRoutes(io));
 app.use('/api/admin/users', verifyToken, checkAdminRole, usersApiRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 initializeSocketLogic(io);
 
