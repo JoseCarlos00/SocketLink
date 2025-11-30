@@ -1,4 +1,7 @@
 import dotenv from 'dotenv';
+import { readFileSync } from 'fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 dotenv.config();
 
@@ -22,3 +25,25 @@ export const config = {
 	// Nombre del archivo de la base de datos SQLite
 	DB_FILE_NAME: getEnvVar('DB_FILE_NAME'),
 };
+
+
+
+interface ServiceAccount {
+	type: string;
+	project_id: string;
+	private_key_id: string;
+	private_key: string;
+	client_email: string;
+	client_id: string;
+	auth_uri: string;
+	token_uri: string;
+	auth_provider_x509_cert_url: string;
+	client_x509_cert_url: string;
+}
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const serviceAccountPath = path.resolve(__dirname, 'service-account.json');
+
+export const SERVICE_ACCOUNT: ServiceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));

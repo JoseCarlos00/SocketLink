@@ -43,3 +43,13 @@ export const clientType = {
 	WEB: 'WEB',
 	ANDROID: 'ANDROID',
 } as const;
+
+
+export const SPREAD_SHEET_ID = '1jYpuNqcyb8RVOgGJ2tXOKZuJ8hnoFsq7Dp2hX8ddczM' as const;
+
+export const CRITICAL_MAPPING_RANGE = 'RF!C:J' as const;
+
+export const METADATA_RANGE = 'Metadatos!A1' as const;
+
+// Frecuencia con la que Node.js revisará el timestamp (en milisegundos)
+export const POLLING_INTERVAL_MS = 10000 as const; // Cada 10 segundos

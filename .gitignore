@@ -130,3 +130,6 @@ dist
 .pnp.*
 
 *.db
+
+# Credenciales de API google
+service-account.json

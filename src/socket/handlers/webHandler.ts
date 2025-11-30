@@ -16,7 +16,7 @@ export function handleWebClientIdentification(socket: AppSocket, payload: Identi
 	if (type === clientType.WEB) {
 		socket.join(roomsName.WEB_CLIENT);
 		console.log(`Cliente web ${socket.id} unido a la room '${roomsName.WEB_CLIENT}'`);
-		socket.emit('UPDATED_INVENTORY', inventoryMaster);
+		socket.emit(submittedEventWeb.UPDATED_INVENTORY, inventoryMaster);
 	}
 }
 
