@@ -6,11 +6,11 @@ import { registerUser } from '../controllers/users.controller.js';
 const router = Router();
 
 
-// POST /api/admin/users - Crea un nuevo usuario (movido desde auth.route)
+// POST /api/admin/users
 router.post('/', registerUser);
 
 // GET /api/admin/users - Obtiene todos los usuarios
-router.get('/', async (_req, res) => {
+router.get('/', async (_, res) => {
 	try {
     const users = await UserModel.getAllUsers();
     

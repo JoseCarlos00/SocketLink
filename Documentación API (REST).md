@@ -7,7 +7,9 @@ A continuación se detallan los puntos de acceso (endpoints) disponibles en la A
 ### `POST /api/auth/login`
 
 - **Método**: `POST`
+- **Middleware**: ninguno.
 - **Descripción**: Autentica a un usuario con su nombre de usuario y contraseña. Si las credenciales son correctas, devuelve un `accessToken` para ser usado en peticiones protegidas y establece una cookie `httpOnly` con el `refreshToken` para poder renovar la sesión.
+
 - **Payload**
 
     ```json
@@ -17,63 +19,69 @@ A continuación se detallan los puntos de acceso (endpoints) disponibles en la A
     }
     ```
 
-**Respuestas**:
+- **Respuestas**:
 
-- **`200 OK`**: Inicio de sesión exitoso.
+  - **`200 OK`**: Inicio de sesión exitoso.
 
-    ```json
-      {
-        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXJ9...",
-        "message": "Inicio de sesión exitoso"
-      }
-    ```
+      ```json
+        {
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXJ9...",
+          "message": "Inicio de sesión exitoso"
+        }
+      ```
 
-- **`400 Bad Request`**: El cuerpo de la petición está vacío o faltan los campos `username` o `password`.
+  - **`400 Bad Request`**:
+    - El cuerpo de la petición está vacío.
 
-    ```json
-      { "error": "El username y password son requeridos" }
-    ```
+        ```json
+          { "message": "Falta el body de la request." }
+        ```
 
-- **`401 Unauthorized`**: El `username` no existe o la `password` es incorrecta.
+    - Faltan los campos `username` o `password`.
 
-    ```json
-      { "error": "Credenciales inválidas" }
-    ```
+        ```json
+          { "message": "El username y password son requeridos" }
+        ```
 
-- **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
+  - **`401 Unauthorized`**: El `username` no existe o la `password` es incorrecta.
 
-    ```json
-    {
-      "message": "Error interno del servidor."
-    }
-    ```
+      ```json
+        { "message": "Credenciales inválidas" }
+      ```
+
+  - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
+
+      ```json
+        { "message": "Error interno del servidor." }
+      ```
 
 ### `POST /api/auth/refresh`
 
 - **Método**: `POST`
+- **Middleware**: ninguno.
 - **Descripción**: Renueva un `accessToken` expirado. Requiere que la cookie `refreshToken` (obtenida durante el login) sea enviada en la petición.
 - **Payload**: Ninguno.
 - **Respuestas**:
   - **`200 OK`**: Token refrescado exitosamente.
 
     ```json
-    {
-      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV9...",
-      "message": "Token refrescado exitosamente"
-    }
+      {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV9...",
+        "message": "Token refrescado exitosamente"
+      }
     ```
 
   - **`401 Unauthorized`**: La cookie `refreshToken` no fue encontrada en la petición.
 
     ```json
-      { "error": "Falta el token de actualización" }
+      { "message": "Falta el token de actualización" }
     ```
 
   - **`403 Forbidden`**: El `refreshToken` es inválido o ha expirado. El usuario debe volver a iniciar sesión.
 
     ```json
-        { "error": "Refresh token inválido o expirado" }
-      ```
+      { "message": "Refresh token inválido o expirado" }
+    ```
 
 #### ¿Cómo Funciona el `refreshToken`? El Dúo Dinámico
 
@@ -86,6 +94,7 @@ El `refreshToken` trabaja en conjunto con el `accessToken`. Piensa en ellos así
 ### `POST /api/auth/logout`
 
 - **Método**: `POST`
+- **Middleware**: ninguno.
 - **Descripción**: Cierra la sesión del usuario invalidando el `refreshToken`. El servidor instruye al navegador para que elimine la cookie.
 - **Payload**: Ninguno.
 - **Respuestas**:
@@ -98,9 +107,7 @@ El `refreshToken` trabaja en conjunto con el `accessToken`. Piensa en ellos así
   - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
 
     ```json
-    {
-      "message": "Error interno del servidor."
-    }
+    { "message": "Error interno del servidor." }
     ```
 
 ---
@@ -109,47 +116,57 @@ El `refreshToken` trabaja en conjunto con el `accessToken`. Piensa en ellos así
 
 Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido y que el rol del usuario sea `ADMIN`.
 
-**`/api/socket/admin`**
+## Respuestas del Middleware `verifyToken`
+
+| Código HTTP | Escenario de Falla | Mensaje JSON Estándar |
+| --- | --- | --- |
+| `401 Unauthorized` | **Token Ausente/Formato**: No se encontró el encabezado `Authorization: Bearer <token>`. | `{"message": "Token de acceso ausente o con formato incorrecto."}` |
+| `401 Unauthorized` | **Payload Inválido**: El contenido del token no tiene la estructura esperada (`username`, `role`, etc.). |`{"message": "La estructura del token no es válida."}` |
+| `401 Unauthorized` | **Usuario No Encontrado**: El ID del usuario en el token no corresponde a ningún registro activo en la base de datos (DB). | `{"message": "Usuario no encontrado."}` |
+| `403 Forbidden` | **Token Expirado/Inválido**: El JWT falló la verificación de la firma o ha expirado. | `{"message": "Token de acceso inválido o expirado."}` |
+
+---
 
 ### `GET /api/socket/admin/update-inventory-master`
 
 - **Método**: `GET`
+
 - **Descripción**: Dispara una actualización del inventario maestro desde **Google Sheet**. Una vez actualizado, notifica a todos los clientes web conectados a través de WebSockets. Solo accesible por administradores.
 
-- **Middleware**: `verifyToken` (implícito), `checkAdminRole`.
 - **Payload**: Ninguno.
 
 - **Respuestas**:
+  
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
+
   - **`200 OK`**: El inventario se actualizó correctamente.
 
     ```json
-    {
-      "message": "Inventario maestro actualizado."
-    }
+    { "message": "Inventario maestro actualizado." }
     ```
 
-- **`401 Unauthorized`**: Token JWT inválido o ausente.
+  - **`403 Forbidden`**: El usuario no tiene rol de `ADMIN`.
 
-- **`403 Forbidden`**: El usuario no tiene rol de `ADMIN`.
+    ```json
+    { "message": "Acceso denegado: solo para administradores." }
+    ```
 
-- **`500 Internal Server Error`**: Ocurrió un error en el servidor al intentar
-actualizar el inventario.
+  - **`500 Internal Server Error`**: Ocurrió un error en el servidor al intentar
+  actualizar el inventario.
 
-  ```json
-  {
-    "message": "Error interno del servidor."
-  }
-  ```
+    ```json
+    { "message": "Error interno del servidor." }
+    ```
 
 ---
 
-**`api/admin/users`**
+🧩 Sección de Rutas: `api/admin/users`
 
-### `POST /api/admin/register`
+### `POST /api/admin/users`
 
 - **Método**: `POST`
+
 - **Descripción**: Registra un nuevo usuario en el sistema. Solo accesible por administradores.
-- **Middleware**: `verifyToken` (implícito en tu configuración de rutas), `checkAdminRole`.
 
 - **`Payload`**:
 
@@ -162,22 +179,18 @@ actualizar el inventario.
   ```
 
 - **`Respuestas`**:
+  
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
   - **`201 Created`**: Usuario registrado con éxito.
 
     ```json
     { "message": "Nuevo usuario registrado con éxito." }
     ```
 
-  - **`400 Bad Request`**: Faltan campos requeridos (`username`, `password`, `role`).
+  - **`400 Bad Request`**: Datos de entrada inválidos.
 
     ```json
     { "message": "Username, password y role son requeridos." }
-    ```
-
-    O el rol no es válido (`ADMIN` o `USER`).
-
-    ```json
-    { "message": "El rol debe ser ADMIN o USER." }
     ```
 
   - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `ADMIN`.
@@ -195,18 +208,19 @@ actualizar el inventario.
   - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
 
     ```json
-    {
-      "message": "Error interno del servidor."
-    }
+    { "message": "Error interno del servidor." }
     ```
 
 ### `GET /api/admin/users`
 
 - **Método**: `GET`
 - **Descripción**: Obtiene una lista de todos los usuarios registrados
-- **Middleware**: `verifyToken` (implícito), `checkAdminRole` (Recomendado).
 - **Payload**: Ninguno.
-- **Respuesta**:
+
+- **Respuestas**:
+
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
+
   - **`200 OK`**: Retorna un array con todos los usuarios.
 
     ```json
@@ -223,3 +237,131 @@ actualizar el inventario.
       }
     ]
     ```
+  
+  - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `ADMIN`.
+
+    ```json
+    { "message": "Acceso denegado: solo para administradores." }
+    ```
+
+  - **`404 Not Found:`**: No se encontraron usuarios en la base de datos.
+
+    ```json
+    { "message": "MENSAJE_ERROR" }
+    ```
+
+  - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
+
+    ```json
+    { "message": "Error interno del servidor." }
+    ```
+
+### `GET /api/admin/users/:id`
+
+- **Método**: `GET`
+- **Descripción**: Obtiene los detalles de un usuario específico mediante su ID.
+- **Parámetros de Ruta**: `id` (INTEGER) - ID del usuario a buscar.
+- **Respuestas**:
+  
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
+
+  - **`200 OK`**: Retorna el objeto del usuario.
+
+    ```JSON
+    {
+      "id": 1,
+      "username": "admin_user",
+      "role": "ADMIN"
+    }
+    ```
+
+  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+
+      ```json
+      { "message": "Acceso denegado: solo para administradores." }
+      ```
+
+  - **`404 Not Found`**: El ID de usuario no existe en la base de datos.
+
+      ```json
+      { "message": "MENSAJE_ERROR" }
+      ```
+
+  - **`500 Internal Server Error`**: Error inesperado.
+
+    ```json
+      { "message": "Error interno del servidor." }
+      ```
+
+### `PUT /api/admin/users/:id`
+
+- **Método**: `PUT`
+- **Descripción**: Actualiza los datos de un usuario específico. Esto se utiliza típicamente para cambiar el `username` o el `role` de un usuario.
+- **Parámetros de Ruta**: `id` (INTEGER) - ID del usuario a actualizar.
+- **Payload**:
+
+    ```JSON
+      {
+        "username": "nuevo_nombre",
+        "role": "USER" 
+        // Se puede actualizar solo el rol o el username
+      }
+    ```
+
+- **Respuestas**:
+  
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
+
+  - **`200 OK`**: Usuario actualizado con éxito.
+
+    ```JSON
+    {"message": "Usuario con ID {id} actualizado con éxito."}
+    ```
+
+  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+
+      ```json
+      { "message": "Acceso denegado: solo para administradores." }
+      ```
+
+  - **`404 Not Found`**: El ID de usuario no existe en la base de datos.
+
+      ```json
+      { "message": "MENSAJE_ERROR" }
+      ```
+
+  - **`500 Internal Server Error`**: Error inesperado.
+
+      ```json
+        { "message": "Error interno del servidor." }
+      ```
+
+### `DELETE /api/admin/users/:id`
+
+- **Método**: `DELETE`
+- **Descripción**: Elimina un usuario del sistema mediante su ID.
+- **Parámetros de Ruta**: `id` (INTEGER) - ID del usuario a eliminar.
+
+- **Respuestas**:  
+  
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
+
+  - **`204 No Content`**: Usuario eliminado con éxito. **Nota:** No se debe retornar cuerpo en el `204`.  
+  
+  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+
+    ```json
+      { "message": "Acceso denegado: solo para administradores." }
+    ```
+
+  - **`404 Not Found`**: El ID de usuario no existe.
+  
+    ```json
+      { "message": "MENSAJE_ERROR" }
+    ```
+
+  - **`500 Internal Server Error`**: Error inesperado.
+
+      ```json
+        { "message": "Error interno del servidor." }
+      ```
