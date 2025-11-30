@@ -31,25 +31,19 @@ A continuación se detallan los puntos de acceso (endpoints) disponibles en la A
       ```
 
   - **`400 Bad Request`**:
-    - El cuerpo de la petición está vacío.
-
-        ```json
-          { "message": "Falta el body de la request." }
-        ```
-
     - Faltan los campos `username` o `password`.
 
         ```json
           { "message": "El username y password son requeridos" }
         ```
 
-  - **`401 Unauthorized`**: El `username` no existe o la `password` es incorrecta.
+    - **`401 Unauthorized`**: El `username` no existe o la `password` es incorrecta.
 
       ```json
         { "message": "Credenciales inválidas" }
       ```
 
-  - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
+    - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
 
       ```json
         { "message": "Error interno del servidor." }
@@ -187,11 +181,18 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
     { "message": "Nuevo usuario registrado con éxito." }
     ```
 
-  - **`400 Bad Request`**: Datos de entrada inválidos.
+  - **`400 Bad Request`**:
+    - Datos de entrada inválidos.
 
-    ```json
-    { "message": "Username, password y role son requeridos." }
-    ```
+      ```json
+      { "message": "Username, password y role son requeridos." }
+      ```
+
+    - El `role` es incorrecto.
+
+      ```json
+      { "message": "El rol debe ser ADMIN o USER." }
+      ```
 
   - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `ADMIN`.
 
@@ -293,7 +294,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "Error interno del servidor." }
       ```
 
-### `PUT /api/admin/users/:id`
+### `PATCH /api/admin/users/:id`
 
 - **Método**: `PUT`
 - **Descripción**: Actualiza los datos de un usuario específico. Esto se utiliza típicamente para cambiar el `username` o el `role` de un usuario.
@@ -302,9 +303,8 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
 
     ```JSON
       {
-        "username": "nuevo_nombre",
-        "role": "USER" 
-        // Se puede actualizar solo el rol o el username
+        "username?": "nuevo_nombre",
+        "role?": "USER" 
       }
     ```
 
@@ -315,8 +315,33 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   - **`200 OK`**: Usuario actualizado con éxito.
 
     ```JSON
-    {"message": "Usuario con ID {id} actualizado con éxito."}
+    {"message": "Usuario actualizado con éxito."}
     ```
+
+  - **`400 Bad Request`**:
+    - El `ID` de usuario no existe o no es valido.
+
+      ```json
+        { "message": "El ID debe ser un número." }
+      ```
+
+    - El contenido del `body` está vacío.
+
+      ```json
+          { "message": "No se proporcionaron datos para actualizar." }
+      ```
+
+    - El `password` se encontró el `body`
+
+      ```json
+          { "message": "Para cambiar la contraseña, utiliza el endpoint dedicado." }
+      ```
+
+    - El `role` proporcionado es incorrecto.
+
+      ```json
+      { "message": "El rol debe ser ADMIN o USER." }
+      ```
 
   - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
 
@@ -324,11 +349,17 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "Acceso denegado: solo para administradores." }
       ```
 
-  - **`404 Not Found`**: El ID de usuario no existe en la base de datos.
+  - **`404 Not Found`**: No se encontró un usuario con ese ID.
 
       ```json
-      { "message": "MENSAJE_ERROR" }
+        { "message": "Usuario no encontrado" }
       ```
+
+  - **`409 Conflict`**: El `username` ya está en uso.
+
+    ```json
+    { "message": "El nombre de usuario ya existe." }
+    ```
 
   - **`500 Internal Server Error`**: Error inesperado.
 
@@ -346,7 +377,13 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   
   - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
 
-  - **`204 No Content`**: Usuario eliminado con éxito. **Nota:** No se debe retornar cuerpo en el `204`.  
+  - **`204 No Content`**: Usuario eliminado con éxito. **Nota:** No se debe retornar cuerpo en el `204`.
+
+  - **`400 Bad Request`**: El `ID` de usuario no existe o no es valido.
+
+    ```json
+      { "message": "El ID debe ser un número." }
+    ```
   
   - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
 
@@ -354,11 +391,19 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "Acceso denegado: solo para administradores." }
     ```
 
-  - **`404 Not Found`**: El ID de usuario no existe.
-  
-    ```json
-      { "message": "MENSAJE_ERROR" }
-    ```
+  - **`404 Not Found`**:
+
+    - El ID de usuario no existe.
+
+        ```json
+          { "message": "El ID debe ser un número." }
+        ```
+
+    - No se encontró un usuario con ese ID.
+
+        ```json
+          { "message": "Usuario no encontrado" }
+        ```
 
   - **`500 Internal Server Error`**: Error inesperado.
 
