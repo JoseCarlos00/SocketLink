@@ -106,9 +106,9 @@ El `refreshToken` trabaja en conjunto con el `accessToken`. Piensa en ellos así
 
 ---
 
-## Administración
+## Administración `ADMIN`
 
-Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido y que el rol del usuario sea `ADMIN`.
+Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido y que el `role` del usuario sea `ADMIN`.
 
 ## Respuestas del Middleware `verifyToken`
 
@@ -154,6 +154,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
 
 ---
 
+## Administración `SUPER_ADMIN`
+
+Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido y que el `role` del usuario sea `SUPER_ADMIN`.
+
 🧩 Sección de Rutas: `api/admin/users`
 
 ### `POST /api/admin/users`
@@ -168,7 +172,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   {
     "username": "nuevo_usuario",
     "password": "una_contraseña_segura",
-    "role": "USER" | "ADMIN"
+    "role": "SUPER_ADMIN" | "ADMIN" | "USER"
   }
   ```
 
@@ -194,10 +198,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "El rol debe ser ADMIN o USER." }
       ```
 
-  - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `ADMIN`.
+  - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `SUPER_ADMIN`.
 
     ```json
-    { "message": "Acceso denegado: solo para administradores." }
+    { "message": "Acceso denegado: solo para super administradores." }
     ```
 
   - **`409 Conflict`**: El `username` ya está en uso.
@@ -239,10 +243,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
     ]
     ```
   
-  - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `ADMIN`.
+  - **`403 Forbidden`**: El usuario que realiza la petición no tiene el rol de `SUPER_ADMIN`.
 
     ```json
-    { "message": "Acceso denegado: solo para administradores." }
+    { "message": "Acceso denegado: solo para super administradores." }
     ```
 
   - **`404 Not Found:`**: No se encontraron usuarios en la base de datos.
@@ -282,10 +286,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
         { "message": "El ID debe ser un número." }
       ```
 
-  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+  - **`403 Forbidden`**: El usuario no tiene el rol de `SUPER_ADMIN`.
 
       ```json
-      { "message": "Acceso denegado: solo para administradores." }
+      { "message": "Acceso denegado: solo para super administradores." }
       ```
 
   - **`404 Not Found`**: El ID de usuario no existe en la base de datos.
@@ -345,10 +349,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "El rol debe ser ADMIN o USER." }
       ```
 
-  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+  - **`403 Forbidden`**: El usuario no tiene el rol de `SUPER_ADMIN`.
 
       ```json
-      { "message": "Acceso denegado: solo para administradores." }
+      { "message": "Acceso denegado: solo para super administradores." }
       ```
 
   - **`404 Not Found`**: No se encontró un usuario con ese ID.
@@ -414,10 +418,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "La contraseña actual es incorrecta." }
       ```
 
-  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+  - **`403 Forbidden`**: El usuario no tiene el rol de `SUPER_ADMIN`.
 
       ```json
-      { "message": "Acceso denegado: solo para administradores." }
+      { "message": "Acceso denegado: solo para super administradores." }
       ```
 
   - **`404 Not Found`**: No se encontró un usuario con ese ID.
@@ -456,10 +460,10 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "El ID debe ser un número." }
     ```
   
-  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+  - **`403 Forbidden`**: El usuario no tiene el rol de `SUPER_ADMIN`.
 
     ```json
-      { "message": "Acceso denegado: solo para administradores." }
+      { "message": "Acceso denegado: solo para super administradores." }
     ```
 
   - **`404 Not Found`**: No se encontró un usuario con ese ID.

@@ -1,14 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 
 export const checkAdminRole = (req: Request, res: Response, next: NextFunction) => {
-	// 1. Obtener el usuario autenticado (asumiendo que está en el objeto de la petición)
 	const user = req.currentUser;
+	const allowedRoles = ['ADMIN', 'SUPER_ADMIN'];
 
-	// 2. Verificar si el usuario existe y si su rol es 'admin'
-	if (!user || user.role !== 'ADMIN') {
+	if (!user || !allowedRoles.includes(user.role)) {
 		return res.status(403).json({ message: 'Acceso denegado: solo para administradores.' });
 	}
 
-	// 3. Si la verificación es exitosa, continuar con la siguiente función (el controlador)
 	next();
 };
+
+export const checkSuperAdminRole = (req: Request, res: Response, next: NextFunction) => {
+	const user = req.currentUser;
+
+	if (!user || user.role !== 'SUPER_ADMIN') {
+		return res.status(403).json({ message: 'Acceso denegado: solo para super administradores.' });
+	}
+
+	next();
+}

@@ -7,7 +7,7 @@ export interface User {
 	id: number;
 	username: string;
 	password_hash: string;
-	role: 'ADMIN' | 'USER';
+	role: 'SUPER_ADMIN' | 'ADMIN' | 'USER';
 }
 
 

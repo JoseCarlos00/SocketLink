@@ -14,7 +14,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from './src/types/ser
 
 // Import Middlewares
 import { socketAuthMiddleware } from './src/middlewares/socket.auth.middleware.js';
-import { checkAdminRole } from "./src/middlewares/auth.middleware.js";
+import { checkSuperAdminRole } from "./src/middlewares/auth.middleware.js";
 import { verifyToken } from './src/middlewares/verifyToken.js';
 
 // Import Routes
@@ -68,7 +68,7 @@ io.use(socketAuthMiddleware);
 
 app.use('/api/auth', authApiRoutes);
 app.use('/api/socket', verifyToken, socketApiRoutes(io));
-app.use('/api/admin/users', verifyToken, checkAdminRole, usersApiRoutes);
+app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
