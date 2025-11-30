@@ -248,7 +248,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   - **`404 Not Found:`**: No se encontraron usuarios en la base de datos.
 
     ```json
-    { "message": "MENSAJE_ERROR" }
+    { "message": "No se encontraron usuarios." }
     ```
 
   - **`500 Internal Server Error`**: Ocurrió un error inesperado en el servidor.
@@ -276,6 +276,12 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
     }
     ```
 
+  - **`400 Bad Request`**: El `ID` de usuario no existe o no es valido.
+
+      ```json
+        { "message": "El ID debe ser un número." }
+      ```
+
   - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
 
       ```json
@@ -285,7 +291,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   - **`404 Not Found`**: El ID de usuario no existe en la base de datos.
 
       ```json
-      { "message": "MENSAJE_ERROR" }
+      { "message": "Usuario no encontrado" }
       ```
 
   - **`500 Internal Server Error`**: Error inesperado.
