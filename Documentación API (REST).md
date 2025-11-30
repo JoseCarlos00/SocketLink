@@ -302,7 +302,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
 
 ### `PATCH /api/admin/users/:id`
 
-- **Método**: `PUT`
+- **Método**: `PATCH`
 - **Descripción**: Actualiza los datos de un usuario específico. Esto se utiliza típicamente para cambiar el `username` o el `role` de un usuario.
 - **Parámetros de Ruta**: `id` (INTEGER) - ID del usuario a actualizar.
 - **Payload**:
@@ -318,11 +318,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   
   - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
 
-  - **`200 OK`**: Usuario actualizado con éxito.
-
-    ```JSON
-    {"message": "Usuario actualizado con éxito."}
-    ```
+  - **`204 No Content`**: Usuario actualizado con éxito.
 
   - **`400 Bad Request`**:
     - El `ID` de usuario no existe o no es valido.
@@ -373,6 +369,75 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
         { "message": "Error interno del servidor." }
       ```
 
+### `PUT /api/admin/users/:id`
+
+- **Método**: `PUT`
+- **Descripción**: Actualiza el `password` del usuario
+- **Parámetros de Ruta**: `id` (INTEGER) - ID del usuario a actualizar.
+- **Payload**:
+
+    ```JSON
+      {
+        "oldPassword?": "old_password",
+        "newPassword": "new_password"
+      }
+    ```
+
+- **Respuestas**:
+  
+  - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
+
+  - **`204 No Content`**: Usuario actualizado con éxito.
+
+  - **`400 Bad Request`**:
+    - El `ID` de usuario no existe o no es valido.
+
+      ```json
+        { "message": "El ID debe ser un número." }
+      ```
+
+    - El contenido del `body` está incompleto.
+
+      ```json
+          { "message": "Se requieren la contraseña anterior y la nueva." }
+      ```
+
+    - El `role` proporcionado es incorrecto.
+
+      ```json
+      { "message": "El rol debe ser ADMIN o USER." }
+      ```
+
+  - **`401 Unauthorized`**: La contraseña actual `oldPassword` es incorrecta.
+
+      ```json
+      { "message": "La contraseña actual es incorrecta." }
+      ```
+
+  - **`403 Forbidden`**: El usuario no tiene el rol de `ADMIN`.
+
+      ```json
+      { "message": "Acceso denegado: solo para administradores." }
+      ```
+
+  - **`404 Not Found`**: No se encontró un usuario con ese ID.
+
+      ```json
+        { "message": "Usuario no encontrado" }
+      ```
+
+  - **`409 Conflict`**: El `password` a actualizar es el mismo que el anterior
+
+      ```json
+          { "message": "La nueva contraseña no puede ser igual a la anterior.." }
+      ```
+
+  - **`500 Internal Server Error`**: Error inesperado.
+
+      ```json
+        { "message": "Error interno del servidor." }
+      ```
+
 ### `DELETE /api/admin/users/:id`
 
 - **Método**: `DELETE`
@@ -383,7 +448,7 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   
   - Para fallos de Autenticación/Autorización, ver la sección [Respuestas del Middleware `verifyToken`](#respuestas-del-middleware-verifytoken).
 
-  - **`204 No Content`**: Usuario eliminado con éxito. **Nota:** No se debe retornar cuerpo en el `204`.
+  - **`204 No Content`**: Usuario eliminado con éxito.
 
   - **`400 Bad Request`**: El `ID` de usuario no existe o no es valido.
 
@@ -397,22 +462,16 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
       { "message": "Acceso denegado: solo para administradores." }
     ```
 
-  - **`404 Not Found`**:
+  - **`404 Not Found`**: No se encontró un usuario con ese ID.
 
-    - El ID de usuario no existe.
-
-        ```json
-          { "message": "El ID debe ser un número." }
-        ```
-
-    - No se encontró un usuario con ese ID.
-
-        ```json
-          { "message": "Usuario no encontrado" }
-        ```
+      ```json
+        { "message": "Usuario no encontrado" }
+      ```
 
   - **`500 Internal Server Error`**: Error inesperado.
 
       ```json
         { "message": "Error interno del servidor." }
       ```
+
+---
