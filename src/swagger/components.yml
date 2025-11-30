@@ -1,0 +1,99 @@
+# src/swagger/components.yml
+
+# El contenido debe estar dentro de un objeto 'components' para que las referencias funcionen.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Proporcionar el accessToken en el formato `Bearer <token>`.
+
+  responses:
+    # Respuestas para el Middleware verifyToken (ejemplos)
+    UnauthorizedTokenAbsence:
+      description: Token de acceso ausente o con formato incorrecto.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: Token de acceso ausente o con formato incorrecto.
+    ForbiddenAdminRole:
+      description: Acceso Denegado por Rol. El usuario no tiene rol de ADMIN.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: "Acceso denegado: solo para administradores."
+    InternalServerError:
+      description: Ocurrió un error inesperado en el servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          example:
+            message: Error interno del servidor.
+    # ... Define aquí todas tus respuestas 401, 403, 500 reutilizables.
+
+  schemas:
+    # Esquema genérico
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensaje de error detallado.
+    MessageOnly:
+      type: object
+      properties:
+        message:
+          type: string
+    
+    # Esquemas de Autenticación
+    LoginPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      required: [username, password]
+    LoginSuccess:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        message:
+          type: string
+
+    # Esquemas de Usuarios (Administración)
+    UserRole:
+      type: string
+      enum: [ADMIN, USER]
+      description: Rol del usuario.
+    UserObject:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+      required: [id, username, role]
+    # ... Define aquí todos tus payloads (NewUserPayload, UpdateUserPayload, etc.)
+    NewUserPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        role:
+          $ref: '#/components/schemas/UserRole'
+      required: [username, password, role]

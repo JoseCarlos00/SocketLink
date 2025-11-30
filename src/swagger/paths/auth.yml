@@ -1,0 +1,42 @@
+/auth/login:
+  post:
+    tags: [Autenticación]
+    summary: Autentica un usuario y devuelve un accessToken
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginPayload'
+    responses:
+      '200':
+        description: Inicio de sesión exitoso.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginSuccess'
+      '400':
+        description: Faltan campos.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorMessage'
+
+/auth/refresh:
+  post:
+    tags: [Autenticación]
+    summary: Renueva un accessToken expirado
+    responses:
+      '200':
+        description: Token refrescado exitosamente.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginSuccess'
+      '401':
+        description: Refresh token no encontrado.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorMessage'
+
+# ... Incluye aquí /auth/logout

@@ -1,0 +1,63 @@
+/admin/users:
+  post:
+    tags: [Administración - Usuarios]
+    summary: Registra un nuevo usuario
+    security:
+      - BearerAuth: []
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewUserPayload'
+    responses:
+      '201':
+        description: Usuario registrado con éxito.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageOnly'
+      '403':
+        # Referencia a la respuesta modularizada
+        $ref: '#/components/responses/ForbiddenAdminRole'
+        
+/admin/users/{id}:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  get:
+    tags: [Administración - Usuarios]
+    summary: Obtiene detalles de un usuario
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Retorna el objeto del usuario.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserObject'
+      '404':
+        description: Usuario no encontrado.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorMessage'
+/socket/admin/update-inventory-master:
+  get:
+    tags: [Administración - Herramientas]
+    summary: Dispara la actualización del inventario
+    security:
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Inventario maestro actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageOnly'
+      '403':
+        $ref: '#/components/responses/ForbiddenAdminRole'
