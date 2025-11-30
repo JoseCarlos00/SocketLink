@@ -35,10 +35,9 @@ export class User {
 	 * Se encarga de hashear la contraseña antes de guardarla.
 	 * @param user - Objeto con los datos del usuario a crear. La contraseña debe estar en texto plano.
 	 */
-	static async create(user: Omit<UserType, 'id' | 'password_hash'> & { password: string }) {
-		const hashedPassword = await User.hashPassword(user.password);
+	static async create(user: Omit<UserType, 'id'>) {
 
 		const statement = db.prepare('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)');
-		statement.run(user.username, hashedPassword, user.role);
+		statement.run(user.username, user.password_hash, user.role);
 	}
 }

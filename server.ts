@@ -7,13 +7,17 @@ import { updateInventory } from './src/socket/state.js';
 import { initializeDatabase } from './src/models/db.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
 import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
-import { verifyToken } from './src/middlewares/verifyToken.js'
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
+
+// Import Middlewares
+import { socketAuthMiddleware } from './src/middlewares/socket.auth.middleware.js';
+import { checkAdminRole } from "./src/middlewares/auth.middleware.js";
+import { verifyToken } from './src/middlewares/verifyToken.js';
 
 // Import Routes
 import socketApiRoutes from './src/api/socket.route.js';
 import authApiRoutes from './src/api/auth.route.js';
-import { socketAuthMiddleware } from './src/middlewares/socket.auth.middleware.js';
+import usersApiRoutes from './src/api/users.route.js';
 
 // 1. Inicializar la base de datos
 initializeDatabase();
@@ -58,8 +62,9 @@ const io = configureSocketIO(server);
 io.use(socketAuthMiddleware);
 
 // Routes
-app.use('/api',verifyToken, socketApiRoutes(io));
+app.use('/api/socket', verifyToken, socketApiRoutes(io));
 app.use('/api/auth', authApiRoutes);
+app.use('/api/admin/users', verifyToken, checkAdminRole, usersApiRoutes);
 
 initializeSocketLogic(io);
 

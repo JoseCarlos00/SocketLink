@@ -11,7 +11,7 @@ export const login = async (req: Request, res: Response) => {
 	const { username, password } = req.body;
 
 	if (!username || !password) {
-		return res.status(400).json({ error: 'Username and password are required' });
+		return res.status(400).json({ error: 'El username y password son requeridos' });
 	}
 
 	try {
@@ -51,10 +51,13 @@ export const login = async (req: Request, res: Response) => {
 export const refreshToken = (req: Request, res: Response) => {
 	const token = req?.cookies?.refreshToken;
 
-	if (!token) return res.status(401).json({ error: 'Refresh token missing' });
+	if (!token) {
+		return res.status(401).json({ error: 'Falta el token de actualización' });
+	}
 
 	try {
 		const payload = verifyRefreshToken(token);
+
 		// Re-crear el payload para el nuevo access token
 		const newPayload: AuthPayload = {
 			id: Number(payload.id),
@@ -64,8 +67,7 @@ export const refreshToken = (req: Request, res: Response) => {
 
 		const accessToken = generateAccessToken(newPayload);
 		res.json({ accessToken, message: 'Token refrescado exitosamente' });
-	} catch (err) {
-		// Si el refresh token es inválido o expiró, el usuario debe volver a loguearse.
+	} catch (error) {
 		res.status(403).json({ error: 'Refresh token inválido o expirado' });
 	}
 };
@@ -77,6 +79,7 @@ export const logout = (_req: Request, res: Response) => {
 			sameSite: 'lax', // Debe coincidir con la configuración de la cookie al crearla
 			secure: false, // Debe coincidir con la configuración de la cookie al crearla
 		});
+
 		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
 	} catch (error) {
 		console.error('Logout error:', error);
@@ -93,7 +96,7 @@ export const registerUser = async (req: Request, res: Response) => {
 			return res.status(400).json({ message: 'Username, password y role son requeridos.' });
 		}
 
-		if(role !== 'ADMIN' && role !== 'USER') {
+		if (role !== 'ADMIN' && role !== 'USER') {
 			return res.status(400).json({ message: 'El rol debe ser ADMIN o USER.' });
 		}
 
@@ -104,10 +107,17 @@ export const registerUser = async (req: Request, res: Response) => {
 			return res.status(409).json({ message: 'El nombre de usuario ya existe.' }); // 409 Conflict es más apropiado aquí.
 		}
 
-		// 3. Guardar el nuevo usuario.
-		await UserModel.create({ username, password, role });
+		// 3. Cifrar la contraseña ANTES de crear el usuario
+		const hashedPassword = await UserModel.hashPassword(password)
 
-		res.status(201).json({ message: 'Nuevo Usuario registrado con éxito.' });
+		// 4. Guardar el nuevo usuario con el hash
+		await UserModel.create({
+			username,
+			password_hash: hashedPassword,
+			role,
+		});
+
+		res.status(201).json({ message: 'Nuevo usuario registrado con éxito.' });
 	} catch (error) {
 		console.error('Error al registrar el usuario:', error);
 		res.status(500).json({ message: 'Error interno del servidor' });
