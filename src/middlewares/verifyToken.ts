@@ -7,20 +7,20 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 	const authHeader = req.header('Authorization');
 	const token = authHeader?.split(' ')[1];
 
-	if (!token) return res.status(401).json({ error: 'Access token missing' });
+	if (!token) return res.status(401).json({ message: 'Token JWT inválido o ausente.' });
 
 	try {
 		const payload = verifyAccessToken(token);
 
 		// Aseguramos que el payload del token tiene la estructura que esperamos
 		if (typeof payload !== 'object' || !payload.username || !payload.role) {
-			return res.status(401).json({ error: 'Invalid token payload' });
+			return res.status(401).json({ message: 'La estructura del token no es válida.' });
 		}
 
 		const getUser = await User.findById(payload.id) as UserType | undefined;
 
 		if (!getUser) {
-			return res.status(401).json({ error: 'User not found' });
+			return res.status(401).json({ message: 'Usuario no encontrado' });
 		}
 
 		req.currentUser = {
@@ -33,6 +33,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 	} catch (error: any) {
 		console.error('Error al verificar el token:', error);
 		// El token puede ser inválido o haber expirado. El cliente debería usar el refresh token en este punto.
-		return res.status(403).json({ error: 'Invalid or expired access token' });
+		return res.status(403).json({ message: 'Token de acceso inválido o expirado.' });
 	}
 };

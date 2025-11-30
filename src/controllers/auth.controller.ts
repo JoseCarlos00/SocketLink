@@ -5,13 +5,13 @@ import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 
 export const login = async (req: Request, res: Response) => {
 	if (!req.body) {
-		return res.status(400).json({ error: 'Request body is missing' });
+		return res.status(400).json({ message: 'Falta el body de la request.' });
 	}
 
 	const { username, password } = req.body;
 
 	if (!username || !password) {
-		return res.status(400).json({ error: 'El username y password son requeridos' });
+		return res.status(400).json({ message: 'El username y password son requeridos' });
 	}
 
 	try {
@@ -20,7 +20,7 @@ export const login = async (req: Request, res: Response) => {
 
 		// 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error.
 		if (!user || !(await UserModel.comparePassword(password, user.password_hash))) {
-			return res.status(401).json({ error: 'Credenciales inválidas' });
+			return res.status(401).json({ message: 'Credenciales inválidas' });
 		}
 
 		// 3. Crear el payload para los tokens con la información del usuario de la BD.
@@ -52,7 +52,7 @@ export const refreshToken = (req: Request, res: Response) => {
 	const token = req?.cookies?.refreshToken;
 
 	if (!token) {
-		return res.status(401).json({ error: 'Falta el token de actualización' });
+		return res.status(401).json({ message: 'Falta el token de actualización' });
 	}
 
 	try {
@@ -68,7 +68,7 @@ export const refreshToken = (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(newPayload);
 		res.json({ accessToken, message: 'Token refrescado exitosamente' });
 	} catch (error) {
-		res.status(403).json({ error: 'Refresh token inválido o expirado' });
+		res.status(403).json({ message: 'Refresh token inválido o expirado' });
 	}
 };
 
