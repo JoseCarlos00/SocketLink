@@ -21,6 +21,7 @@ import { verifyToken } from './src/middlewares/verifyToken.js';
 import socketApiRoutes from './src/api/socket.route.js';
 import authApiRoutes from './src/api/auth.route.js';
 import usersApiRoutes from './src/api/users.route.js';
+import inventoryApiRoutes from './src/api/inventory.route.js';
 
 // 1. Inicializar la base de datos
 initializeDatabase();
@@ -69,6 +70,7 @@ io.use(socketAuthMiddleware);
 app.use('/api/auth', authApiRoutes);
 app.use('/api/socket', verifyToken, socketApiRoutes(io));
 app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
+app.use('/api/inventory', verifyToken, inventoryApiRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
