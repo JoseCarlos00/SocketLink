@@ -20,9 +20,9 @@ import type { RegisterDevicePayload } from '../types/payloadsGetApp.d.ts'
 import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
 
 function registerDeviceEventHandlers(socket: AppSocket) {
-	socket.on(receivedEventsApp.REGISTER_DEVICE, (data: RegisterDevicePayload) =>
-		handleDeviceRegistration(socket, data)
-	);
+	socket.on(receivedEventsApp.REGISTER_DEVICE, (data: RegisterDevicePayload, ack) => {
+		handleDeviceRegistration(socket, data, ack);
+	});
 }
 
 function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {

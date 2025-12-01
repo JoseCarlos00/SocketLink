@@ -32,7 +32,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
 	// Android
-	[receivedEventsApp.REGISTER_DEVICE]: (payload: RegisterDevicePayload, ack?: RegisterDeviceAck) => void;
+	[receivedEventsApp.REGISTER_DEVICE]: (payload: RegisterDevicePayload, ack: RegisterDeviceAck) => void;
 
 	// Web
 	[receivedEventWeb.IDENTIFY_CLIENT]: (payload: IdentifyClientPayload) => void;
