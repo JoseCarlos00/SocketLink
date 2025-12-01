@@ -18,6 +18,7 @@ Una vez conectado, el servidor tendrá acceso a la identidad del usuario (`id`, 
 
 | Rol | Permisos |
 | :--- | :--- |
+| **SUPER_ADMIN** | **Acceso total.**  |
 | **ADMIN** | **Acceso total.** Puede enviar todas las alarmas, mensajes, pings, y forzar la sincronización del inventario (API REST). |
 | **USER** | **Acceso operativo.** Puede enviar alarmas y pings a dispositivos individuales, pero no comandos masivos o de administración. |
 
