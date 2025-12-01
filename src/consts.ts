@@ -47,9 +47,14 @@ export const clientType = {
 
 export const SPREAD_SHEET_ID = '1jYpuNqcyb8RVOgGJ2tXOKZuJ8hnoFsq7Dp2hX8ddczM' as const;
 
-export const CRITICAL_MAPPING_RANGE = 'RF!C:J' as const;
+export const SHEET_NAME = 'RF';
+export const IP_COLUMN = `${SHEET_NAME}!H` as const;
+export const ANDROID_ID_COLUMN = `${SHEET_NAME}!J` as const;
+export const CRITICAL_MAPPING_RANGE = `${SHEET_NAME}!C:J` as const;
+
 
 export const METADATA_RANGE = 'Metadatos!A1' as const;
+
 
 // Frecuencia con la que Node.js revisará el timestamp (en milisegundos)
 export const POLLING_INTERVAL_MS = 10000 as const; // Cada 10 segundos
