@@ -4,9 +4,17 @@
 
 | **Módulo/Proceso** | **Responsabilidad** | **Protocolo Principal** | **Documentación Recomendada** |
 | --- | --- | --- | --- |
-| **AlertScanner** | Comunicación en tiempo real (ALARM, PING, MESSAGE) y estado del dispositivo. | **WebSocket / Socket.IO** | Tu documentación actual (Eventos y ACKs). |
-| **Auth & Access** | Gestión de usuarios, roles, login, y permisos de la App Web. | **HTTP / REST** | Nueva documentación (Endpoints, SQL/SQLite, Flujo de Login). |
-| **System API** | Endpoints HTTP para la administración (Ej: `/api/actualizar-inventario`). | **HTTP / REST** | Nueva documentación (Endpoints y Permisos). |
+| **AlertScanner** | Comunicación en tiempo real (ALARM, PING, MESSAGE) y estado del dispositivo. | **WebSocket / Socket.IO** | (Eventos y ACKs). |
+| **Auth & Access** | Gestión de usuarios, roles, login, y permisos de la App Web. | **HTTP / REST** |  (Endpoints, SQL/SQLite, Flujo de Login). |
+| **System API** | Endpoints HTTP para la administración (Ej: `/api/inventory/devices`). | **HTTP / REST** |  |
+
+* * *
+
+**Nuevo Evento (Opcional):**
+
+- **Node.js:** En `handleDeviceRegistration` y `handleDeviceDisconnect`, emite un evento como `socket.emit('DEVICE_STATUS', { id: androidId, connected: true/false })` a la *room* de clientes web.
+
+- **Frontend:** La web escucha `DEVICE_STATUS` para cambiar rápidamente un ícono de rojo a verde junto al nombre del equipo sin tener que recargar toda la lista.
 
 * * *
 
