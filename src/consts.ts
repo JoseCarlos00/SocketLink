@@ -35,7 +35,7 @@ export const submittedEventWeb = {
 
 export const roomsName = {
 	WEB_CLIENT: 'WEB_CLIENT',
-	ANDROID_CLIENT: 'ANDROID_CLIENT',
+	ANDROID_APP: 'ANDROID_APP',
 } as const;
 
 
@@ -43,6 +43,7 @@ export const clientType = {
 	WEB: 'WEB',
 	ANDROID: 'ANDROID',
 } as const;
+;
 
 
 const LIMIT_ROWS_SEARCH = 350;

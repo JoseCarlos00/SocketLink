@@ -45,7 +45,7 @@ export async function handleDeviceRegistration(
 	// Establecer Conexión en Memoria (Caché B)
 	socket.data.deviceId = androidId;
 	socket.join(androidId); // La room de destino
-	socket.join(roomsName.ANDROID_CLIENT);
+	socket.join(roomsName.ANDROID_APP);
 	activeConnections.set(androidId, socket.id); // Registra en Caché B
 
 	console.log(`[REGISTRO] IP:'${deviceData.ip}' registrado. ID: ${androidId}.`);

@@ -159,27 +159,27 @@ export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload, callb
 
 export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
-	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_CLIENT);
+	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_APP);
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_CLIENT).emit(submittedEventsApp.CHECK_FOR_UPDATE);
+		io.to(roomsName.ANDROID_APP).emit(submittedEventsApp.CHECK_FOR_UPDATE);
 
-		console.log(`Evento ${submittedEventsApp.CHECK_FOR_UPDATE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_CLIENT}'.`);
+		console.log(`Evento ${submittedEventsApp.CHECK_FOR_UPDATE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`);
 		callback({ status: 'OK', message: `Solicitud de actualización enviada a ${androidClientsRoom.size} dispositivos.` });
 	} else {
-		console.warn(`Se intentó enviar ${submittedEventsApp.CHECK_FOR_UPDATE} a la sala '${roomsName.ANDROID_CLIENT}', pero no hay dispositivos conectados.`);
+		console.warn(`Se intentó enviar ${submittedEventsApp.CHECK_FOR_UPDATE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`);
 		callback({ status: 'WARN', message: 'No hay dispositivos Android conectados para recibir la solicitud.' });
 	}
 }
 
 export function handleSendAllMessage(io: AppIO,payload: SendAllMessagePayload,callback: WebCallback) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
-	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_CLIENT);
+	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_APP);
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_CLIENT).emit(submittedEventsApp.MESSAGE, payload.dataMessage, response => {
+		io.to(roomsName.ANDROID_APP).emit(submittedEventsApp.MESSAGE, payload.dataMessage, response => {
 			console.log('Respuesta recibida:', response);
 			if (response?.status === 'ERROR') {
 				callback({ status: 'ERROR', message: response?.reason! });
@@ -194,11 +194,11 @@ export function handleSendAllMessage(io: AppIO,payload: SendAllMessagePayload,ca
 
 
 		console.log(
-			`Evento ${submittedEventsApp.MESSAGE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_CLIENT}'.`
+			`Evento ${submittedEventsApp.MESSAGE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`
 		);
 	} else {
 		console.warn(
-			`Se intentó enviar ${submittedEventsApp.MESSAGE} a la sala '${roomsName.ANDROID_CLIENT}', pero no hay dispositivos conectados.`
+			`Se intentó enviar ${submittedEventsApp.MESSAGE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`
 		);
 		callback({ status: 'WARN', message: 'No hay dispositivos Android conectados para recibir la solicitud.' });
 	}
