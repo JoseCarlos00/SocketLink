@@ -25,7 +25,6 @@ async function loadAndSetCache() {
 				// Mapea el ID_Android a un objeto de datos
 				fixedMappingCache.set(ip, {
 					index: row[0] ?? null,
-					androidId: row[7] ?? 'N/A',
 					equipo: row[3] ?? 'N/A',
 					modelo: row[4] ?? 'N/A',
 					usuario: row[5] ?? 'N/A',
@@ -33,6 +32,7 @@ async function loadAndSetCache() {
 					aliasUsuario: row[7] ?? 'N/A',
 					ip: ip,
 					macAddress: row[9] ?? 'N/A',
+					androidId: row[10] ?? 'N/A',
 				} as MappingData);
 			}
 		});
