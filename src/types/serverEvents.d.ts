@@ -26,7 +26,7 @@ export interface ServerToClientEvents {
 	[submittedEventsApp.GET_DEVICE_INFO]: (ack: GetDeviceInfoAck) => void;
 
 	// Web
-	[submittedEventWeb.UPDATED_INVENTORY]: (inventory: Inventory[]) => void;
+	[submittedEventWeb.INVENTORY_UPDATE_ALERT]: () => void;
 }
 
 

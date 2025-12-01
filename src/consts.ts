@@ -29,7 +29,7 @@ export const receivedEventWeb = {
 } as const;
 
 export const submittedEventWeb = {
-	UPDATED_INVENTORY: 'UPDATED_INVENTORY',
+	INVENTORY_UPDATE_ALERT: 'INVENTORY_UPDATE_ALERT',
 } as const;
 
 

@@ -14,7 +14,7 @@ export default function createApiRoutes(io: AppIO) {
 			const newInventory = await fetchInventoryFromGoogleSheet();
 			updateInventory(newInventory);
 
-			io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.UPDATED_INVENTORY, inventoryMaster);
+			io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.INVENTORY_UPDATE_ALERT);
 
 			const webClientsCount = io.sockets.adapter.rooms.get(roomsName.WEB_CLIENT)?.size || 0;
 			console.log(`Inventario actualizado y notificado a ${webClientsCount} ${roomsName.WEB_CLIENT}.`);
