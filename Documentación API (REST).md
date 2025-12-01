@@ -106,10 +106,6 @@ El `refreshToken` trabaja en conjunto con el `accessToken`. Piensa en ellos así
 
 ---
 
-## Administración `ADMIN`
-
-Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido y que el `role` del usuario sea `ADMIN`.
-
 ## Respuestas del Middleware `verifyToken`
 
 | Código HTTP | Escenario de Falla | Mensaje JSON Estándar |
@@ -121,11 +117,15 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
 
 ---
 
-### `GET /api/socket/admin/update-inventory-master`
+## Todos los usuarios `USER`
+
+Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido
+
+### `GET /api/inventory/devices`
 
 - **Método**: `GET`
 
-- **Descripción**: Dispara una actualización del inventario maestro desde **Google Sheet**. Una vez actualizado, notifica a todos los clientes web conectados a través de WebSockets. Solo accesible por administradores.
+- **Descripción**: Dispara
 
 - **Payload**: Ninguno.
 
@@ -136,13 +136,17 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   - **`200 OK`**: El inventario se actualizó correctamente.
 
     ```json
-    { "message": "Inventario maestro actualizado." }
-    ```
-
-  - **`403 Forbidden`**: El usuario no tiene rol de `ADMIN`.
-
-    ```json
-    { "message": "Acceso denegado: solo para administradores." }
+    {  
+      "id": "androidId", // El ID que la web enviará como target_device_id
+      "equipo": "FME0003",
+      "modelo": "TCH002",
+      "usuario": "Juan Gonzales",
+      "correo": "example@example.com",
+      "aliasUsuario": "Otro nombre",
+      "ip": "192.168.15.189",
+      "macAddress": "D0:4E:50:F8:63:E2",
+      "isConnected": true | false,
+    }
     ```
 
   - **`500 Internal Server Error`**: Ocurrió un error en el servidor al intentar
@@ -151,6 +155,12 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
     ```json
     { "message": "Error interno del servidor." }
     ```
+
+---
+
+## Administración `ADMIN`
+
+Estos endpoints requieren que el usuario esté autenticado con un `accessToken` válido y que el `role` del usuario sea `ADMIN`.
 
 ---
 

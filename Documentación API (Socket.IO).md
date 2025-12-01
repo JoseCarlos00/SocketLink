@@ -242,35 +242,32 @@ interface TargetedDevicePayload {
 
 Estos son los eventos que el servidor emitirá y que el cliente web debe escuchar para mantenerse actualizado.
 
-### `UPDATED_INVENTORY`
+### `INVENTORY_UPDATE_ALERT`
 
-- **Evento**: `UPDATED_INVENTORY`
-- **Descripción**: El servidor emite este evento cuando el inventario de dispositivos ha sido actualizado. El cliente web recibe la lista completa y actualizada de dispositivos. Esto ocurre en dos situaciones:
+- **Evento**: `INVENTORY_UPDATE_ALERT`
+- **Descripción**: El servidor emite este evento cuando el inventario de dispositivos ha sido actualizado. El cliente web tiene que solicitar nuevamente la lista actualizada de dispositivos en `fetch(/api/inventory/devices)`
 
-    1. Inmediatamente después de que el cliente se identifica con `IDENTIFY_CLIENT`.
-    2. Cuando el inventario se actualiza a través de la API REST.
-- **Payload**:
-
-```typescript
-// Array de objetos Inventory
-Inventory[]
-
-interface Inventory {
-    androidId: string;
-    deviceAlias: string;
-    lastConnection: string;
-    lastIp: string;
-    appVersion: string;
-    socketId: string;
-    status: 'ONLINE' | 'OFFLINE';
-}
-```
+- **Payload**: ninguno.
 
 - **Ejemplo de uso**:
 
 ```javascript
-socket.on('UPDATED_INVENTORY', (inventory) => {
-  console.log('Inventario actualizado:', inventory);
-  // Lógica para renderizar el nuevo inventario en la UI
-});
+  socket.on('INVENTORY_UPDATE_ALERT', () => {
+    console.log('Señal de actualización de inventario recibida. Iniciando fetch...');
+    // Llamada a la función que realiza la solicitud HTTP GET
+    fetchInventoryData(); 
+  });
+
+  function fetchInventoryData() {
+    // Llama a la ruta HTTP que lee de la caché del servidor Node.js
+    fetch('/api/inventory/devices', {
+        // Se recomienda usar encabezados de caché como If-None-Match si es posible
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Actualiza la UI de la Web con los nuevos datos
+        updateDeviceListUI(data); 
+    })
+    .catch(error => console.error("Error al obtener el inventario:", error));
+  }
 ```
