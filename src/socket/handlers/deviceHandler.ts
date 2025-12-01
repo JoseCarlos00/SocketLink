@@ -1,29 +1,55 @@
 import type { AppSocket } from '../../types/socketInterface.d.ts';
 import { roomsName } from '../../consts.js';
-import { activeConnections } from '../state.js';
+import { activeConnections, fixedMappingCache } from '../state.js';
 import type { RegisterDevicePayload, RegisterDeviceAck } from '../../types/payloadsGetApp.d.ts';
+import { updateAndroidIdInSheets } from '../../services/googleSheetService.js'
 
 
 
-export function handleDeviceRegistration(socket: AppSocket, data: RegisterDevicePayload, ack?: RegisterDeviceAck) {
-	const { androidId, ipAddress } = data;
+export async function handleDeviceRegistration(
+	socket: AppSocket,
+	data: RegisterDevicePayload,
+	ack?: RegisterDeviceAck
+) {
+	const { androidId, ipAddress } = data; // androidId es el DEVICE_ID que envía el móvil
 
-	if (!androidId) {
-		console.error('Error de registro: falta DEVICE_ID');
-		ack?.({ status: 'ERROR', reason: 'El ID del dispositivo (androidId) es requerido.' });
+	if (!androidId || !ipAddress) {
+		ack?.({ status: 'ERROR', reason: 'Datos de identificación incompletos.' });
 		return;
 	}
 
-	// Asignamos el deviceId a la propiedad personalizada del socket
+	// 1. Buscar el dispositivo usando la IP Fija como clave
+	const deviceData = fixedMappingCache.get(ipAddress);
+
+	if (!deviceData) {
+		// Dispositivo Desconocido: No existe en la hoja de cálculo
+		console.warn(`[REGISTRO] Dispositivo DESCONOCIDO intentó conectarse. IP: ${ipAddress}`);
+		// No lo registramos en activeConnections.
+		return ack?.({ status: 'ERROR', reason: `Dispositivo con IP ${ipAddress} no registrado.` });
+	}
+
+	// 2. Dispositivo Conocido: Verificar/Actualizar el androidId
+
+	// Si el androidId de la hoja está vacío o es diferente al que envía el móvil:
+	if (!deviceData.androidId || deviceData.androidId !== androidId) {
+		console.log(`[REGISTRO] IP ${ipAddress} necesita actualización de androidId.`);
+
+		// **ACTUALIZACIÓN EN SHEETS (Persistencia)**
+		await updateAndroidIdInSheets(ipAddress, androidId);
+
+		// **ACTUALIZACIÓN EN CACHÉ A (Uso Inmediato)**
+		deviceData.androidId = androidId;
+	}
+
+	// 3. Establecer Conexión en Memoria (Caché B)
+
+	// La clave para el socket siempre será el androidId (deviceId) ya que es la clave única del móvil.
 	socket.data.deviceId = androidId;
-	socket.join(androidId);
+	socket.join(androidId); // La room de destino
 	socket.join(roomsName.ANDROID_CLIENT);
+	activeConnections.set(androidId, socket.id); // Registra en Caché B
 
-	activeConnections.set(androidId, socket.id);
-	console.log(`Dispositivo registrado: ${androidId} (IP: ${ipAddress})`);
-	console.log(`Conexiones activas: ${activeConnections.size}`);
-
-	// Enviamos la confirmación de éxito al dispositivo
+	console.log(`[REGISTRO] IP:'${deviceData.ip}' registrado. ID: ${androidId}.`);
 	ack?.({ status: 'OK' });
 }
 

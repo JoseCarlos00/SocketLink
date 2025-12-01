@@ -10,7 +10,7 @@ export function updateInventory(newInventory: Inventory[]) {
 	inventoryMaster = newInventory;
 }
 
-// Caché A: Mapeo de datos fijos (ID_Android -> Equipo/Modelo/Usuario)
+// Caché A: Mapeo de datos fijos (IP -> Equipo/Modelo/Usuario)
 export const fixedMappingCache = new Map<string, MappingData>();
 
 // Caché B: Conexiones activas (ID_Android -> Socket.ID)
@@ -26,18 +26,18 @@ async function loadAndSetCache() {
 		const data = await getCriticalMappingData(SPREAD_SHEET_ID);
 
 		data.forEach((row) => {
-			const androidId = row[7];
+			const ip = row[5];
 
-			if (androidId) {
+			if (ip) {
 				// Mapea el ID_Android a un objeto de datos
-				fixedMappingCache.set(androidId, {
-					androidId: androidId,
+				fixedMappingCache.set(ip, {
+					androidId: row[7] ?? 'N/A',
 					equipo: row[0] ?? 'N/A',
 					modelo: row[1] ?? 'N/A',
 					usuario: row[2] ?? 'N/A',
 					correo: row[3] ?? 'N/A',
 					aliasUsuario: row[4] ?? 'N/A',
-					ip: row[5] ?? 'N/A',
+					ip: ip,
 					macAddress: row[6] ?? 'N/A',
 				} as MappingData);
 			}

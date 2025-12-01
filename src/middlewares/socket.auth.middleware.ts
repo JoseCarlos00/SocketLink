@@ -23,7 +23,7 @@ export const socketAuthMiddleware = async (socket: AppSocket, next: (err?: Error
 
 	try {
 		const decoded = jwt.verify(token, config.JWT_SECRET) as AuthPayload;
-		const user = await UserModel.findById(decoded.id) as UserType;
+		const user = UserModel.findById(decoded.id) as UserType;
 
 		if (!user) {
 			return next(new Error('Authentication error: Usuario no encontrado.'));

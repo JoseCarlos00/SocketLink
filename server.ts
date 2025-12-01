@@ -5,10 +5,9 @@ import swaggerUi from 'swagger-ui-express'
 
 import swaggerSpec  from './src/swagger.js';
 import { config } from './src/config.js';
-import { startSheetsPolling, updateInventory } from './src/socket/state.js';
+import { startSheetsPolling } from './src/socket/state.js';
 import { initializeDatabase } from './src/models/db.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
-import { fetchInventoryFromGoogleSheet } from './src/services/googleSheetService.js';
 
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
 
@@ -78,15 +77,7 @@ initializeSocketLogic(io);
 
 async function startServer() {
 	try {
-		// 1. Cargar inventario inicial (PRIMERA CARGA DE CACHÉ)
-		const initialInventory = await fetchInventoryFromGoogleSheet();
-		updateInventory(initialInventory); // Función que establece fixedMappingCache.set(...)
-		console.log('Inventario inicial cargado.');
-
-		// 2. Iniciar el Polling:
-		// Ahora, fixedMappingCache ya tiene datos. startSheetsPolling solo iniciará el temporizador
-		// para monitorear el timestamp, sin necesidad de hacer una doble carga inicial.
-		startSheetsPolling();
+		// startSheetsPolling();
 		console.log('Monitoreo de Google Sheets (Polling) iniciado.');
 
 		server.listen(config.PORT, () => {

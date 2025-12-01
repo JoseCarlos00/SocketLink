@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import { roomsName, submittedEventWeb } from "../consts.js";
 
-import { fetchInventoryFromGoogleSheet } from '../services/googleSheetService.js';
-import { updateInventory, inventoryMaster } from '../socket/state.js';
 import { checkAdminRole } from '../middlewares/auth.middleware.js';
 import type { AppIO } from '../types/socketInterface.js';
 
@@ -11,8 +9,6 @@ export default function createApiRoutes(io: AppIO) {
 
 	router.get('admin/update-inventory-master', checkAdminRole, async (req, res) => {
 		try {
-			const newInventory = await fetchInventoryFromGoogleSheet();
-			updateInventory(newInventory);
 
 			io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.INVENTORY_UPDATE_ALERT);
 
