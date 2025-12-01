@@ -36,7 +36,7 @@ async function loadAndSetCache() {
 		});
 
 		console.log(`[Cache] Caché A cargada con ${fixedMappingCache.size} entradas.`);
-		console.log(fixedMappingCache.size > 0 ? fixedMappingCache : "Vacío");
+		// console.log(fixedMappingCache.size > 0 ? fixedMappingCache : "Vacío");
 		
 	} catch (error) {
 		console.error('[Cache Error] Error al cargar los datos de Sheets:', error);
