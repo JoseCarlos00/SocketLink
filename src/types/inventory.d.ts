@@ -6,6 +6,7 @@ export interface Inventory {
 }
 
 export interface MappingData {
+	index: string;
 	androidId: string;
 	equipo: string;
 	modelo: string;

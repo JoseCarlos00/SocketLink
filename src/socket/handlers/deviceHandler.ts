@@ -31,9 +31,7 @@ export async function handleDeviceRegistration(
 
 		try {
 			// **ACTUALIZACIÓN EN SHEETS (Persistencia)**
-			const isWriteAndroId = await updateAndroidIdInSheets(ipAddress, androidId);
-			console.log({isWriteAndroId});
-			
+			await updateAndroidIdInSheets(deviceData.index, ipAddress, androidId);
 		} catch (error) {
 			console.error(error);
 			ack?.({ status: 'ERROR', reason: `Error al actualizar Google Sheets para la IP ${ipAddress}.` });

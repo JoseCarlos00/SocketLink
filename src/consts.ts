@@ -45,12 +45,13 @@ export const clientType = {
 } as const;
 
 
+const LIMIT_ROWS_SEARCH = 500;
 export const SPREAD_SHEET_ID = '1jYpuNqcyb8RVOgGJ2tXOKZuJ8hnoFsq7Dp2hX8ddczM' as const;
 
 export const SHEET_NAME = 'RF';
-export const IP_COLUMN = `${SHEET_NAME}!H` as const;
-export const ANDROID_ID_COLUMN = `${SHEET_NAME}!J` as const;
-export const CRITICAL_MAPPING_RANGE = `${SHEET_NAME}!C:J` as const;
+export const IP_COLUMN = `${SHEET_NAME}!I2:I${LIMIT_ROWS_SEARCH + 1}` as const;
+export const ANDROID_ID_COLUMN = `${SHEET_NAME}!K` as const;
+export const CRITICAL_MAPPING_RANGE = `${SHEET_NAME}!A2:K${LIMIT_ROWS_SEARCH}` as const;
 
 
 export const METADATA_RANGE = 'Metadatos!A1' as const;

@@ -19,22 +19,24 @@ async function loadAndSetCache() {
 		const data = await getCriticalMappingData(SPREAD_SHEET_ID);
 
 		data.forEach((row) => {
-			const ip = row[5];
+			const ip = row[8];
 
 			if (ip) {
 				// Mapea el ID_Android a un objeto de datos
 				fixedMappingCache.set(ip, {
+					index: row[0] ?? null,
 					androidId: row[7] ?? 'N/A',
-					equipo: row[0] ?? 'N/A',
-					modelo: row[1] ?? 'N/A',
-					usuario: row[2] ?? 'N/A',
-					correo: row[3] ?? 'N/A',
-					aliasUsuario: row[4] ?? 'N/A',
+					equipo: row[3] ?? 'N/A',
+					modelo: row[4] ?? 'N/A',
+					usuario: row[5] ?? 'N/A',
+					correo: row[6] ?? 'N/A',
+					aliasUsuario: row[7] ?? 'N/A',
 					ip: ip,
-					macAddress: row[6] ?? 'N/A',
+					macAddress: row[9] ?? 'N/A',
 				} as MappingData);
 			}
 		});
+
 
 		console.log(`[Cache] Caché A cargada con ${fixedMappingCache.size} entradas.`);
 		// console.log(fixedMappingCache.size > 0 ? fixedMappingCache : "Vacío");
