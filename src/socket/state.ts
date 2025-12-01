@@ -1,6 +1,7 @@
 import { getCriticalMappingData, getMetadataTimestamp } from '../services/googleSheetService.js';
-import { SPREAD_SHEET_ID, POLLING_INTERVAL_MS } from '../consts.js';
+import { SPREAD_SHEET_ID, POLLING_INTERVAL_MS, roomsName, submittedEventWeb } from '../consts.js';
 import type {  MappingData } from '../types/inventory.d.ts';
+import type { AppIO } from '../types/socketInterface.d.ts';
 
 // Caché A: Mapeo de datos fijos (IP -> Equipo/Modelo/Usuario)
 export const fixedMappingCache = new Map<string, MappingData>();
@@ -46,7 +47,7 @@ async function loadAndSetCache() {
 /**
  * Inicia el polling para revisar el timestamp de Google Sheets.
  */
-export function startSheetsPolling() {
+export function startSheetsPolling(io: AppIO) {
 	// Realiza la primera carga al iniciar
 	loadAndSetCache();
 
@@ -59,10 +60,13 @@ export function startSheetsPolling() {
 				console.log('[Polling] ¡Timestamp cambiado! Recargando caché A...');
 				await loadAndSetCache();
 				lastKnownTimestamp = currentTimestamp;
+
+				// Notificar a los clientes web sobre la actualización
+				io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.INVENTORY_UPDATE_ALERT, { message: 'El inventario ha sido actualizado.'});
+				console.log('[Socket] Notificación de actualización de inventario enviada a los clientes web.');
 			}
 		} catch (error) {
 			console.error('[Polling Error] Falló la revisión del timestamp:', error);
 		}
 	}, POLLING_INTERVAL_MS);
 }
-

@@ -77,7 +77,7 @@ initializeSocketLogic(io);
 
 async function startServer() {
 	try {
-		startSheetsPolling();
+		startSheetsPolling(io);
 		console.log('Monitoreo de Google Sheets (Polling) iniciado.');
 
 		server.listen(config.PORT, () => {
