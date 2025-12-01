@@ -1,14 +1,6 @@
 import { getCriticalMappingData, getMetadataTimestamp } from '../services/googleSheetService.js';
 import { SPREAD_SHEET_ID, POLLING_INTERVAL_MS } from '../consts.js';
-import type { Inventory, MappingData } from '../types/inventory.d.ts';
-
-// 2. Cache del Inventario Maestro (de Google Sheet)
-export let inventoryMaster: Inventory[] = [];
-
-// Función para actualizar el inventario
-export function updateInventory(newInventory: Inventory[]) {
-	inventoryMaster = newInventory;
-}
+import type {  MappingData } from '../types/inventory.d.ts';
 
 // Caché A: Mapeo de datos fijos (IP -> Equipo/Modelo/Usuario)
 export const fixedMappingCache = new Map<string, MappingData>();
