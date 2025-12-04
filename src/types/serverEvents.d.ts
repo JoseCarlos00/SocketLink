@@ -15,7 +15,7 @@ type SubmittedEventWebKeys = keyof typeof submittedEventWeb;
 
 export interface ServerToClientEvents {
 	// Android
-	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack?: AlarmAck) => void;
+	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack: AlarmAck) => void;
 
 	[submittedEventsApp.PING]: (payload: null, ack: PingAck) => void;
 
