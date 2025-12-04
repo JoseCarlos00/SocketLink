@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import swaggerUi from 'swagger-ui-express'
+import cors from 'cors';
 
 import swaggerSpec  from './src/swagger.js';
 import { config } from './src/config.js';
@@ -30,8 +31,14 @@ initializeDatabase();
  * @returns {express.Application} La aplicación Express configurada.
  */
 function configureApp(): express.Application {
-const app = express();
+	const app = express();
+	// Configura el middleware de CORS para todas las rutas HTTP
+	app.use(cors({
+		origin: config.CORS_ORIGIN, // Reutiliza la configuración de origen de CORS
+		credentials: true // Permite el envío de cookies (útil para /auth/refresh)
+	}));
 	app.use(express.json());
+	
 	return app;
 }
 
@@ -41,6 +48,7 @@ const app = express();
  * @returns {SocketIOServer} La instancia de Socket.IO configurada.
  */
 function configureSocketIO(server: http.Server): SocketIOServer {
+	// Establece un timeout global para los acknowledgements.
 	const io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
 	cors: {
 		origin: config.CORS_ORIGIN,
