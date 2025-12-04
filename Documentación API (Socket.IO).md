@@ -131,8 +131,8 @@ interface AlarmActivationPayload {
 interface SendMessagePayload {
     target_device_id: string; // ID del dispositivo Android
     dataMessage: {
-        title: string;
-        body: string;
+        message: string;
+        sender?: string; // default "Nuevo Mensaje"
     };
 }
 ```
@@ -154,8 +154,8 @@ interface SendMessagePayload {
 ```typescript
 interface SendAllMessagePayload {
     dataMessage: {
-        title: string;
-        body: string;
+        message: string;
+        sender?: string; // default "Nuevo Mensaje"
     };
 }
 ```
