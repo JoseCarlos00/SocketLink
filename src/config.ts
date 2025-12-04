@@ -21,11 +21,12 @@ export const config = {
 	PORT: getEnvVar('PORT') || 3000,
 	CORS_ORIGIN: getEnvVar('CORS_ORIGIN') || '*',
 	API_SECRET_TOKEN: getEnvVar('API_SECRET_TOKEN'),
+	NODE_ENV: getEnvVar('NODE_ENV') || 'development'	,
+
 
 	// Nombre del archivo de la base de datos SQLite
 	DB_FILE_NAME: getEnvVar('DB_FILE_NAME'),
 };
-
 
 
 interface ServiceAccount {

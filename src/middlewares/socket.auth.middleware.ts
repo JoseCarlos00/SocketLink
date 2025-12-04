@@ -54,4 +54,5 @@ export const socketAuthMiddleware = async (socket: AppSocket, next: (err?: Error
 			return next(new Error('Authentication error: Invalid or expired token.'));
 		}
 	}
+	return next(new Error('Authentication error: Unknown client type.'));
 };

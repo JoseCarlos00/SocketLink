@@ -4,6 +4,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import swaggerUi from 'swagger-ui-express'
 import cors from 'cors';
 
+import Logger from './src/services/logger.js';
 import swaggerSpec  from './src/swagger.js';
 import { config } from './src/config.js';
 import { startSheetsPolling } from './src/socket/state.js';
@@ -33,12 +34,19 @@ initializeDatabase();
 function configureApp(): express.Application {
 	const app = express();
 	// Configura el middleware de CORS para todas las rutas HTTP
-	app.use(cors({
-		origin: config.CORS_ORIGIN, // Reutiliza la configuración de origen de CORS
-		credentials: true // Permite el envío de cookies (útil para /auth/refresh)
-	}));
+	app.use(
+		cors({
+			origin: config.CORS_ORIGIN, // Reutiliza la configuración de origen de CORS
+			credentials: true, // Permite el envío de cookies (útil para /auth/refresh)
+		})
+	);
 	app.use(express.json());
-	
+
+	app.use((req, res, next) => {
+		Logger.http(`Request: ${req.method} ${req.originalUrl}`, { ip: req.ip });
+		next();
+	});
+
 	return app;
 }
 
@@ -86,13 +94,13 @@ initializeSocketLogic(io);
 async function startServer() {
 	try {
 		startSheetsPolling(io);
-		console.log('Monitoreo de Google Sheets (Polling) iniciado.');
+		Logger.info('Monitoreo de Google Sheets (Polling) iniciado.');
 
 		server.listen(config.PORT, () => {
-			console.log(`Servidor Socket.IO/Express escuchando en el puerto ${config.PORT}`);
+			Logger.info(`Servidor Socket.IO/Express escuchando en el puerto ${config.PORT}`);
 		});
 	} catch (error) {
-		console.error('Error fatal al iniciar el servidor:', error);
+		Logger.error(`Error fatal al iniciar el servidor: ${error instanceof Error ? error.message : error}`);
 		process.exit(1);
 	}
 }
