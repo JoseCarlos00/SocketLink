@@ -17,13 +17,13 @@ export interface ServerToClientEvents {
 	// Android
 	[submittedEventsApp.ALARM]: (payload?: AlarmPayload, ack?: AlarmAck) => void;
 
-	[submittedEventsApp.PING]: (payload: null, ack?: PingAck) => void;
+	[submittedEventsApp.PING]: (payload: null, ack: PingAck) => void;
 
-	[submittedEventsApp.MESSAGE]: (payload: MessagePayload, ack?: MessageAck) => void;
+	[submittedEventsApp.MESSAGE]: (payload: MessagePayload, ack: MessageAck) => void;
 
 	[submittedEventsApp.CHECK_FOR_UPDATE]: () => void;
 
-	[submittedEventsApp.GET_DEVICE_INFO]: (ack: GetDeviceInfoAck) => void;
+	[submittedEventsApp.GET_DEVICE_INFO]: (payload: null, ack: GetDeviceInfoAck) => void;
 
 	// Web
 	[submittedEventWeb.INVENTORY_UPDATE_ALERT]: (payload?: { message: string }) => void;
