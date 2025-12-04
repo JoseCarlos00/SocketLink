@@ -52,9 +52,6 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback: WebCallback) {
 	const { target_device_id, dataMessage } = data;
 
-	console.log('[server] data:', data);
-	
-
 	if (!target_device_id) {
 		console.error('Error en handleSendMessage: target_device_id no fue proporcionado.');
 		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
