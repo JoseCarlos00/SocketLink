@@ -52,6 +52,28 @@ config.ts
   'sock_A'         => Set { 'sock_A' },
   'sock_B'         => Set { 'sock_B' },
   'sock_C'         => Set { 'sock_C' }
-}```
+}
+```
 
+## SISTEMA SOCKET.IO (WEB + ANDROID)
 
+### **Handshake**
+
+- Valida API Key (Android)
+- Valida JWT (Web)
+
+### **Evento inicial**
+
+- Web: `IDENTIFY_CLIENT` → organizar rooms
+- Android: `REGISTER_DEVICE` → ejecutar lógica + rooms
+
+### **Roles**
+
+- Web usa roles de usuario (ADMIN / USER)
+- Android no tiene roles, solo deviceId
+
+### **Rooms**
+
+- `ANDROID_APP`
+- `WEB_CLIENT`
+- room privada por `deviceId`
