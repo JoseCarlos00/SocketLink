@@ -32,14 +32,14 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 		const { durationSeconds, deviceAlias } = data;
 		const payload = { durationSeconds, deviceAlias };
 
-		io.to(target_device_id).emit(submittedEventsApp.ALARM, payload, response => {
-			console.log('Respuesta recibida:', response);
-			if (response?.status === 'ERROR') {
-				callback({ status: 'ERROR', message: response?.reason! });
+		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.ALARM, payload, (err, responses) => {
+			if (err) {
+				console.error(`Error en ${submittedEventsApp.ALARM}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
 				return;
 			}
-
-			callback({ status: 'OK', message: response?.status! });
+			const response = responses[0]; // La respuesta real está en un array
+			callback({ status: response?.status || 'OK', message: response?.status || 'Alarma procesada.' });
 		});
 
 		console.log(`Evento ${submittedEventsApp.ALARM} enviado a ${target_device_id} con payload:`, payload);
@@ -49,8 +49,11 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 	}
 }
 
-export function handleSendMessage(io: AppIO,data: SendMessagePayload, callback: WebCallback) {
+export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback: WebCallback) {
 	const { target_device_id, dataMessage } = data;
+
+	console.log('[server] data:', data);
+	
 
 	if (!target_device_id) {
 		console.error('Error en handleSendMessage: target_device_id no fue proporcionado.');
@@ -58,26 +61,24 @@ export function handleSendMessage(io: AppIO,data: SendMessagePayload, callback: 
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.MESSAGE, dataMessage, response => {
-			console.log('Respuesta recibida:', response);
-			if (response?.status === 'ERROR') {
-				callback({ status: 'ERROR', message: response?.reason! });
+		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.MESSAGE, dataMessage, (err, responses) => {
+			if (err) {
+				console.error(`Error en ${submittedEventsApp.MESSAGE}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
 				return;
 			}
-
-			callback({ status: 'OK', message: response?.status! });
+			const response = responses[0];
+			callback({ status: response?.status || 'OK', message: response?.status || 'Mensaje procesado.' });
 		});
 
-
 		console.log(`Evento MESSAGE enviado a: ${target_device_id}`);
-		callback({ status: 'OK', message: 'Mensaje enviado correctamente.' });
 	} else {
 		console.error(`Error en handleSendMessage: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
-export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload, callback: WebCallback) {
+export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -86,15 +87,14 @@ export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload, callback:
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.PING, null, response => {
-			console.log('Respuesta recibida:', response);
-
-			if (response?.status === 'ERROR') {
-					callback({ status: 'ERROR', message: response?.reason!});
-					return;
+		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.PING, null, (err, responses) => {
+			if (err) {
+				console.error(`Error en ${submittedEventsApp.PING}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+				return;
 			}
-
-			callback({ status: 'OK', message: response?.status! });
+			const response = responses[0];
+			callback({ status: 'OK', message: `Ping respondido: ${response?.status}` });
 		});
 
 		console.log(`Evento ${submittedEventsApp.PING} enviado a: ${target_device_id}`);
@@ -104,7 +104,7 @@ export function handlePingAlarm(io: AppIO,data: TargetedDevicePayload, callback:
 	}
 }
 
-export function handleCheckForUpdate(io: AppIO,data: TargetedDevicePayload, callback: WebCallback) {
+export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -123,7 +123,7 @@ export function handleCheckForUpdate(io: AppIO,data: TargetedDevicePayload, call
 	}
 }
 
-export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload, callback: WebCallback) {
+export function handleGetDeviceInfo(io: AppIO, data: TargetedDevicePayload, callback: WebCallback) {
 	const { target_device_id } = data;
 
 	if (!target_device_id) {
@@ -133,22 +133,23 @@ export function handleGetDeviceInfo(io: AppIO,data: TargetedDevicePayload, callb
 
 	if (activeConnections.has(target_device_id)) {
 		// El servidor pide la información y espera la respuesta en el callback (si la app lo soporta)
-		io.to(target_device_id).emit(submittedEventsApp.GET_DEVICE_INFO, (response) => {
-			const deviceInfo = Array.isArray(response) ? response[0] : response;
+		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.GET_DEVICE_INFO, null, (err, responses) => {
+			if (err) {
+				console.error(`Error en ${submittedEventsApp.GET_DEVICE_INFO}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+				return;
+			}
 
-			if (deviceInfo && deviceInfo.androidId) {
-				console.log('Respuesta recibida:', deviceInfo);
+			const deviceInfo = responses[0]; // responses es un array, tomamos el primer elemento.
+			if (deviceInfo?.androidId) {
 				callback({ status: 'OK', message: 'Información del dispositivo obtenida.', data: deviceInfo });
 			} else {
-				console.error('La app no pudo procesar la solicitud.');
 				callback({
 					status: 'ERROR',
 					message: 'El dispositivo no respondió o la respuesta no fue válida.',
 				});
 			}
 		});
-
-		console.log(`Evento ${submittedEventsApp.GET_DEVICE_INFO} enviado a: ${target_device_id}`);
 	} else {
 		console.error(`Error en handleGetDeviceInfo: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
@@ -173,23 +174,24 @@ export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 	}
 }
 
-export function handleSendAllMessage(io: AppIO,payload: SendAllMessagePayload,callback: WebCallback) {
+export function handleSendAllMessage(io: AppIO, payload: SendAllMessagePayload, callback: WebCallback) {
 	// Obtenemos el conjunto de sockets conectados a la sala de clientes Android.
 	const androidClientsRoom = io.sockets.adapter.rooms.get(roomsName.ANDROID_APP);
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_APP).emit(submittedEventsApp.MESSAGE, payload.dataMessage, response => {
-			console.log('Respuesta recibida:', response);
-			if (response?.status === 'ERROR') {
-				callback({ status: 'ERROR', message: response?.reason! });
+		io.to(roomsName.ANDROID_APP).timeout(5000).emit(submittedEventsApp.MESSAGE, payload.dataMessage, (err, responses) => {
+			if (err) {
+				// Este error se activa si NINGÚN cliente responde.
+				console.error(`Error en ${submittedEventsApp.MESSAGE} a la sala: Ningún dispositivo respondió a tiempo.`);
+				callback({ status: 'ERROR', message: 'Ningún dispositivo respondió a tiempo.' });
 				return;
-			};
+			}
 
-			callback({
-				status: 'OK',
-				message: `Mensajes Enviados a ${androidClientsRoom.size} dispositivos.`,
-			});
+			// responses es un array con las respuestas de los clientes que sí contestaron.
+			const successfulResponses = responses.filter(r => r?.status !== 'ERROR');
+
+			callback({ status: 'OK', message: `Mensaje procesado por ${successfulResponses.length} de ${androidClientsRoom.size} dispositivos.` });
 		});
 
 
