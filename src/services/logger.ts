@@ -1,5 +1,6 @@
 import winston from 'winston';
 import { config } from '../config.js';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 // Define los niveles de severidad de los logs.
 const levels = {
@@ -38,13 +39,25 @@ const format = winston.format.combine(
 
 // Define los "transportes" (dónde se guardarán los logs).
 const transports = [
-  // Guardar los errores en un archivo separado.
-  new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
-  }),
-  // Guardar todos los logs (desde info hacia arriba) en otro archivo.
-  new winston.transports.File({ filename: 'logs/combined.log' }),
+	// Transporte para rotar los logs de errores.
+	new DailyRotateFile({
+		level: 'error',
+		filename: 'logs/error-%DATE%.log', // Patrón del nombre de archivo. %DATE% será reemplazado.
+		datePattern: 'YYYY-MM-DD', // El formato de la fecha.
+		zippedArchive: true, // Comprime los archivos de log antiguos.
+		maxSize: '20m', // Rota el archivo si alcanza los 20MB.
+		maxFiles: '14d', // Elimina los logs después de 14 días.
+		format: winston.format.uncolorize(), // Guarda en el archivo sin colores.
+	}),
+	// Transporte para rotar todos los logs (desde el nivel configurado hacia arriba).
+	new DailyRotateFile({
+		filename: 'logs/combined-%DATE%.log',
+		datePattern: 'YYYY-MM-DD',
+		zippedArchive: true,
+		maxSize: '20m',
+		maxFiles: '14d',
+		format: winston.format.uncolorize(), // Guarda en el archivo sin colores.
+	}),
 ];
 
 // Crea y exporta la instancia del logger.
