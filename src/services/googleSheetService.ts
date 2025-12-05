@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { SERVICE_ACCOUNT } from '../config.js';
+import { googleSheetLogger as logger } from './logger.js';
 import {
 	CRITICAL_MAPPING_RANGE,
 	METADATA_RANGE,
@@ -35,8 +36,6 @@ export async function getCriticalMappingData(spreadsheetId: string) {
 		range: CRITICAL_MAPPING_RANGE,
 	});
 
-	// console.log(result.data.values?.slice(0, 2));
-	
 	// Retorna los valores o un array vacío si no hay datos
 	return result.data.values || [];
 }
@@ -78,7 +77,8 @@ export async function findRowIndexByIp(spreadsheetId: string, ipAddress: string)
 		}
 		return null;
 	} catch (error) {
-		throw new Error(`Error al buscar el índice por IP: ${error}`);
+		logger.error(`Error al buscar el índice por IP: ${error}`);
+		throw new Error(`Error al buscar el índice por IP.`);
 	}
 }
 
@@ -90,7 +90,7 @@ export async function findRowIndexByIp(spreadsheetId: string, ipAddress: string)
  */
 export async function updateAndroidIdInSheets(rowIndex: string, ipAddress: string, androidId: string): Promise<boolean> {
 	if (rowIndex === null) {
-		console.warn(`[Sheets] No se puede actualizar: IP Fija ${ipAddress} no encontrada.`);
+		logger.warn(`No se puede actualizar: IP Fija ${ipAddress} no encontrada.`);
 		return false;
 	}
 
@@ -108,10 +108,10 @@ export async function updateAndroidIdInSheets(rowIndex: string, ipAddress: strin
 				],
 			},
 		});
-		console.log(`[Sheets] androidId actualizado para ${ipAddress} en la fila ${rangeToUpdate}.`);
+		logger.info(`androidId actualizado para ${ipAddress} en la fila ${rangeToUpdate}.`);
 		return true;
 	} catch (error) {
-		console.error(`[Sheets] Error al escribir androidId para ${ipAddress}:`, error);
+		logger.error(`Error al escribir androidId para ${ipAddress}: ${error}`);
 		return false;
 	}
 }
