@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token.js';
 import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';
+import { adminLogger as logger } from '../services/logger.js';
 
 export const login = async (req: Request, res: Response) => {
 	if (!req.body) {
@@ -16,10 +17,12 @@ export const login = async (req: Request, res: Response) => {
 
 	try {
 		// 1. Buscar al usuario por su nombre de usuario.
+		logger.info(`Intento de inicio de sesión para el usuario: ${username}`);
 		const user = UserModel.findByUsername(username) as UserType | undefined;
 
 		// 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error.
 		if (!user || !(await Bcrypt.comparePassword(password, user.password_hash))) {
+			logger.warn(`Credenciales inválidas para el usuario: ${username}`);
 			return res.status(401).json({ message: 'Credenciales inválidas' });
 		}
 
@@ -41,9 +44,10 @@ export const login = async (req: Request, res: Response) => {
 		});
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
+		logger.info(`Inicio de sesión exitoso para el usuario: ${username}`);
 		res.json({ accessToken, message: 'Inicio de sesión exitoso' });
 	} catch (error) {
-		console.error('Login error:', error);
+		logger.error(`Error en el proceso de login para ${username}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
@@ -66,9 +70,11 @@ export const refreshToken = (req: Request, res: Response) => {
 		};
 
 		const accessToken = generateAccessToken(newPayload);
+		logger.info(`Token de acceso refrescado para el usuario: ${payload.username}`);
 		res.json({ accessToken, message: 'Token refrescado exitosamente' });
 	} catch (error) {
-		res.status(403).json({ message: 'Refresh token inválido o expirado' });
+		logger.warn(`Intento de refrescar token fallido: ${error}`);
+		res.status(403).json({ message: 'Refresh token inválido, expirado o manipulado.' });
 	}
 };
 
@@ -80,10 +86,10 @@ export const logout = (_req: Request, res: Response) => {
 			secure: false, // Debe coincidir con la configuración de la cookie al crearla
 		});
 
+		logger.info('Sesión cerrada exitosamente. Cookie de refreshToken eliminada.');
 		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
 	} catch (error) {
-		console.error('Logout error:', error);
+		logger.error(`Error durante el cierre de sesión: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
-

@@ -65,5 +65,6 @@ export const androidLogger = Logger.child({ module: 'ANDROID_APP' });
 export const webLogger = Logger.child({ module: 'WEB_APP' });
 export const googleSheetLogger = Logger.child({ module: 'GOOGLE_SHEETS' });
 export const cacheLogger = Logger.child({ module: 'CACHE' });
+export const inventoryLogger = Logger.child({ module: 'INVENTORY_API' });
 
 export default Logger;
