@@ -63,5 +63,6 @@ export const adminLogger = Logger.child({ module: 'ADMIN_API' });
 export const socketLogger = Logger.child({ module: 'SOCKET' });
 export const androidLogger = Logger.child({ module: 'ANDROID_APP' });
 export const webLogger = Logger.child({ module: 'WEB_APP' });
+export const googleSheetLogger = Logger.child({ module: 'GOOGLE_SHEETS' });
 
 export default Logger;

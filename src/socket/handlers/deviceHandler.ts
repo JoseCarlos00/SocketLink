@@ -3,6 +3,7 @@ import { roomsName } from '../../consts.js';
 import { activeConnections, fixedMappingCache } from '../state.js';
 import type { RegisterDevicePayload, RegisterDeviceAck } from '../../types/payloadsGetApp.d.ts';
 import { updateAndroidIdInSheets } from '../../services/googleSheetService.js';
+import { androidLogger, googleSheetLogger } from '../../services/logger.js';
 
 export async function handleDeviceRegistration(
 	socket: AppSocket,
@@ -20,20 +21,20 @@ export async function handleDeviceRegistration(
 
 	if (!deviceData) {
 		// Dispositivo Desconocido: No existe en la hoja de cálculo
-		console.warn(`[REGISTRO] Dispositivo DESCONOCIDO intentó conectarse. IP: ${ipAddress}`);
+			googleSheetLogger.warn(`[REGISTRO] Dispositivo DESCONOCIDO intentó conectarse. IP: ${ipAddress}`);
 		ack?.({ status: 'ERROR', reason: `Dispositivo con IP ${ipAddress} no registrado.` });
 		return;
 	}
 
 	// Si el androidId de la hoja está vacío o es diferente al que envía el móvil:
 	if (!deviceData.androidId || deviceData.androidId !== androidId) {
-		console.log(`[REGISTRO] IP ${ipAddress} necesita actualización de androidId.`);
+			googleSheetLogger.warn(`[REGISTRO] IP ${ipAddress} necesita actualización de androidId.`);
 
 		try {
 			// **ACTUALIZACIÓN EN SHEETS (Persistencia)**
 			await updateAndroidIdInSheets(deviceData.index, ipAddress, androidId);
 		} catch (error) {
-			console.error(error);
+			androidLogger.error(`[REGISTRO]: ${error}`);
 			ack?.({ status: 'ERROR', reason: `Error al actualizar Google Sheets para la IP ${ipAddress}.` });
 			return;
 		}
@@ -48,13 +49,18 @@ export async function handleDeviceRegistration(
 	socket.join(roomsName.ANDROID_APP);
 	activeConnections.set(androidId, socket.id); // Registra en Caché B
 
-	console.log(`[REGISTRO] IP:'${deviceData.ip}' registrado. ID: ${androidId}.`);
+	androidLogger.info(`[REGISTRO] Dispositivo registrado. IP: ${ipAddress}, ID: ${androidId}`);
 	ack?.({ status: 'OK' });
 }
 
 export function handleDeviceDisconnect(socket: AppSocket) {
-	if (socket.data.deviceId) {
-		activeConnections.delete(socket.data.deviceId);
-		console.log(`Dispositivo desconectado y eliminado: ${socket.data.deviceId}`);
+	const { deviceId } = socket.data;
+	
+	if (deviceId) {
+		androidLogger.info(`[DESCONEXIÓN] Dispositivo desconectado: ${deviceId}`);
+		activeConnections.delete(deviceId);
+		socket.leave(deviceId);
+		socket.leave(roomsName.ANDROID_APP);
+		socket.data.deviceId = undefined;
 	}
 }
