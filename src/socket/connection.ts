@@ -1,4 +1,5 @@
 import type { AppIO, AppSocket } from '../types/socketInterface.d.ts';
+import { socketLogger } from '../services/logger.js';
 import { receivedEventsApp, receivedEventWeb } from '../consts.js';
 import {
 	handleDeviceDisconnect,
@@ -67,14 +68,14 @@ function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
 
 export function initializeSocketLogic(io: AppIO) {
 	io.on('connection', (socket: AppSocket) => {
-		console.log(`Cliente conectado: ${socket.id}`);
+		socketLogger.info(`Nuevo socket conectado. ID: ${socket.id}`);
 
 		registerDeviceEventHandlers(socket);
 		registerWebClientEventHandlers(socket, io);
 
 		socket.on('disconnect', () => {
 			handleDeviceDisconnect(socket);
-			console.log(`Cliente desconectado: ${socket.id}.`);
+			socketLogger.warn(`Socket desconectado. ID: ${socket.id}`);
 		});
 	});
 }
