@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/token.js';
 import { User } from '../models/user.model.js';
 import type { User as UserType } from "../types/user.d.ts";
+import Logger from '../services/logger.js'
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
 	const authHeader = req.header('Authorization');
@@ -31,7 +32,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 
 		next();
 	} catch (error: any) {
-		console.error('Error al verificar el token:', error);
+		Logger.error(`Error al verificar el token: ${error.message}`);
 		// El token puede ser inválido o haber expirado. El cliente debería usar el refresh token en este punto.
 		return res.status(403).json({ message: 'Token de acceso inválido o expirado.' });
 	}

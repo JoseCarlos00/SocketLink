@@ -38,8 +38,6 @@ const format = winston.format.combine(
 
 // Define los "transportes" (dónde se guardarán los logs).
 const transports = [
-  // Siempre mostrar todos los logs en la consola.
-  new winston.transports.Console(),
   // Guardar los errores en un archivo separado.
   new winston.transports.File({
     filename: 'logs/error.log',
