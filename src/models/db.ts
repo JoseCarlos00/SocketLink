@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import { config } from '../config.js';
+import Logger from '../services/logger.js'
 const { DB_FILE_NAME } = config;
 
 
@@ -13,7 +14,7 @@ const db = new Database(DB_FILE_NAME, {
  * Función para inicializar las tablas (ejecutada una sola vez al inicio del servidor)
  */
 export function initializeDatabase() {
-	console.log(`[DB] Conectado a la base de datos: ${DB_FILE_NAME}`);
+	Logger.info(`[DB] Conectado a la base de datos: [${DB_FILE_NAME}]`);
 
 	// Crear la tabla de usuarios si no existe
 	const createUserTable = db.prepare(`
