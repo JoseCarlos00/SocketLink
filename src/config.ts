@@ -45,6 +45,9 @@ interface ServiceAccount {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const serviceAccountPath = path.resolve(__dirname, 'service-account.json');
+// Determina cuántos niveles subir basado en el entorno.
+const relativePath = config.NODE_ENV === 'production' ? '../../' : '../';
+
+const serviceAccountPath = path.resolve(__dirname, relativePath, 'data', 'service-account.json');
 
 export const SERVICE_ACCOUNT: ServiceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));

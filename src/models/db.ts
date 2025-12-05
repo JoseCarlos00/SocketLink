@@ -1,12 +1,23 @@
 import Database from 'better-sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from '../config.js';
 import Logger from '../services/logger.js'
 const { DB_FILE_NAME } = config;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Determina cuántos niveles subir basado en el entorno.
+const relativePath = config.NODE_ENV === 'production' ? '../../..' : '../..';
+
+// Construye la ruta absoluta al archivo de la base de datos.
+const absoluteDbPath = path.resolve(__dirname, relativePath, DB_FILE_NAME);
+// --- FIN: Lógica para resolver la ruta absoluta de la DB ---
 
 // 1. Crear la instancia de la base de datos
 // 'options' es opcional, pero útil para depuración.
-const db = new Database(DB_FILE_NAME, {
+const db = new Database(absoluteDbPath, {
 	// verbose: console.log,
 });
 
@@ -14,7 +25,7 @@ const db = new Database(DB_FILE_NAME, {
  * Función para inicializar las tablas (ejecutada una sola vez al inicio del servidor)
  */
 export function initializeDatabase() {
-	Logger.info(`[DB] Conectado a la base de datos: [${DB_FILE_NAME}]`);
+	Logger.info(`[DB] Conectado a la base de datos en: [${absoluteDbPath}]`);
 
 	// Crear la tabla de usuarios si no existe
 	const createUserTable = db.prepare(`
