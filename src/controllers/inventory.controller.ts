@@ -1,4 +1,5 @@
 import { activeConnections, fixedMappingCache } from '../socket/state.js';
+import { inventoryLogger as logger } from '../services/logger.js';
 
 /**
  * Obtiene la lista de todos los dispositivos registrados desde la caché.
@@ -19,9 +20,10 @@ export function getRegisteredDevicesList(req: any, res: any) {
 			isConnected: activeConnections.has(device.androidId), // Muestra el estado en tiempo real
 		}));
 
+		logger.info(`Se ha solicitado la lista de inventario. Total de dispositivos en caché: ${devicesList.length}`);
 		res.status(200).json(devicesList);
 	} catch (error) {
-    console.error('Inventory error:', error);
+		logger.error(`Error al obtener la lista de dispositivos del inventario: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
   }
 }
