@@ -80,6 +80,13 @@ const io = configureSocketIO(server);
 io.use(socketAuthMiddleware);
 
 // Routes
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    service: 'AlertScannerService API', 
+    status: 'Running',
+    version: '1.0'
+  });
+});
 
 app.use('/api/auth', authApiRoutes);
 app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
