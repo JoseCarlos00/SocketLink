@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { User as UserModel, Bcrypt } from '../models/user.model.js';
+import { adminLogger as logger } from '../services/logger.js';
 import type { User as UserType } from '../types/user.d.ts';
 
 type UpdateUser = Pick<UserType, 'username' | 'role'>;
@@ -19,6 +20,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
 			res.status(404).json({ message: 'No se encontraron usuarios.' });
 		}
 	} catch (error) {
+		logger.error(`Error al obtener todos los usuarios: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
@@ -39,6 +41,7 @@ export const getUserById = async (req: Request, res: Response) => {
 			res.status(404).json({ message: 'Usuario no encontrado' });
 		}
 	} catch (error) {
+		logger.error(`Error al obtener el usuario por ID ${req.params.id}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
@@ -68,9 +71,10 @@ export const registerUser = async (req: Request, res: Response) => {
 			role,
 		});
 
+		logger.info(`Usuario '${username}' registrado con éxito.`);
 		res.status(201).json({ message: 'Nuevo usuario registrado con éxito.' });
 	} catch (error) {
-		console.error('Error al registrar el usuario:', error);
+		logger.error(`Error al registrar el usuario '${req?.body?.username}': ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
@@ -90,9 +94,10 @@ export const deleteUser = async (req: Request, res: Response) => {
 			return res.status(404).json({ message: 'Usuario no encontrado' });
 		}
 
+		logger.info(`Usuario con ID ${userId} eliminado con éxito.`);
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error al eliminar el usuario:', error);
+		logger.error(`Error al eliminar el usuario con ID ${req?.params?.id}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
@@ -144,9 +149,10 @@ export const updateUser = async (req: Request, res: Response) => {
 
 		UserModel.update(userId, updateData);
 
+		logger.info(`Usuario con ID ${userId} actualizado. Datos: ${JSON.stringify(updateData)}`);
 		res.status(204).send()
 	} catch (error) {
-		console.error('Error al actualizar el usuario:', error);
+		logger.error(`Error al actualizar el usuario con ID ${req?.params?.id}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
@@ -186,9 +192,10 @@ export const updatePassword = async (req: Request, res: Response) => {
 
 		UserModel.updatePassword(userId, newPasswordHashed);
 
+		logger.info(`Contraseña actualizada para el usuario con ID ${userId}.`);
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error al actualizar la contraseña:', error);
+		logger.error(`Error al actualizar la contraseña para el usuario con ID ${req?.params?.id}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
