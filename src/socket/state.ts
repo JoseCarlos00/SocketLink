@@ -1,5 +1,6 @@
 import { getCriticalMappingData, getMetadataTimestamp } from '../services/googleSheetService.js';
 import { SPREAD_SHEET_ID, POLLING_INTERVAL_MS, roomsName, submittedEventWeb } from '../consts.js';
+import { cacheLogger as logger } from '../services/logger.js';
 import type {  MappingData } from '../types/inventory.d.ts';
 import type { AppIO } from '../types/socketInterface.d.ts';
 
@@ -38,11 +39,9 @@ async function loadAndSetCache() {
 		});
 
 
-		console.log(`[Cache] Caché A cargada con ${fixedMappingCache.size} entradas.`);
-		// console.log(fixedMappingCache.size > 0 ? fixedMappingCache : "Vacío");
-		
+		logger.info(`Caché de inventario cargada con ${fixedMappingCache.size} entradas.`);
 	} catch (error) {
-		console.error('[Cache Error] Error al cargar los datos de Sheets:', error);
+		logger.error(`Error al cargar los datos de Sheets: ${error}`);
 	}
 }
 
@@ -59,16 +58,16 @@ export function startSheetsPolling(io: AppIO) {
 			const currentTimestamp = await getMetadataTimestamp(SPREAD_SHEET_ID);
 
 			if (currentTimestamp && currentTimestamp !== lastKnownTimestamp) {
-				console.log('[Polling] ¡Timestamp cambiado! Recargando caché A...');
+				logger.info('¡Timestamp de Sheets cambiado! Recargando caché de inventario...');
 				await loadAndSetCache();
 				lastKnownTimestamp = currentTimestamp;
 
 				// Notificar a los clientes web sobre la actualización
 				io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.INVENTORY_UPDATE_ALERT, { message: 'El inventario ha sido actualizado.'});
-				console.log('[Socket] Notificación de actualización de inventario enviada a los clientes web.');
+				logger.info('Notificación de actualización de inventario enviada a los clientes web.');
 			}
 		} catch (error) {
-			console.error('[Polling Error] Falló la revisión del timestamp:', error);
+			logger.error(`Falló la revisión del timestamp en el polling: ${error}`);
 		}
 	}, POLLING_INTERVAL_MS);
 }
