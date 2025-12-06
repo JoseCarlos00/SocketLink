@@ -4,6 +4,8 @@ import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 import { adminLogger as logger } from '../services/logger.js';
 
+import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME} from "../consts.js";
+
 export const login = async (req: Request, res: Response) => {
 	if (!req.body) {
 		return res.status(400).json({ message: 'Falta el body de la request.' });
@@ -36,7 +38,7 @@ export const login = async (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(payload);
 		const refreshToken = generateRefreshToken(payload);
 
-		res.cookie('jwt-refresh-token', refreshToken, {
+		res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: false,
@@ -44,7 +46,7 @@ export const login = async (req: Request, res: Response) => {
 		});
 
 		// Cookie para el Access Token (accesible por el servidor de Next.js)
-		res.cookie('jwt-access-token', accessToken, {
+		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
 			httpOnly: false, // Para que el servidor Next.js pueda leerla
 			sameSite: 'lax',
 			secure: false,
@@ -61,24 +63,43 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const refreshToken = (req: Request, res: Response) => {
-	const token = req?.cookies?.refreshToken;
+	// 1. Corregir el nombre de la cookie que se lee.
+	const token = req?.cookies?.['jwt-refresh-token'];
 
 	if (!token) {
 		return res.status(401).json({ message: 'Falta el token de actualización' });
 	}
 
 	try {
-		const payload = verifyRefreshToken(token);
+		const currentPayload = verifyRefreshToken(token) as AuthPayload;
 
-		// Re-crear el payload para el nuevo access token
+		// 2. Crear un nuevo payload para los nuevos tokens.
 		const newPayload: AuthPayload = {
-			id: Number(payload.id),
-			username: payload.username,
-			role: payload.role,
+			id: currentPayload.id,
+			username: currentPayload.username,
+			role: currentPayload.role,
 		};
 
+		// 3. Generar un nuevo accessToken Y un nuevo refreshToken (rotación).
 		const accessToken = generateAccessToken(newPayload);
-		logger.info(`Token de acceso refrescado para el usuario: ${payload.username}`);
+		const newRefreshToken = generateRefreshToken(newPayload);
+
+		// 4. Actualizar ambas cookies, igual que en el login.
+		res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, {
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: false, // Cambiar a true en producción
+			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+		});
+
+		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
+			httpOnly: false,
+			sameSite: 'lax',
+			secure: false, // Cambiar a true en producción
+			maxAge: 15 * 60 * 1000, // 15 minutos
+		});
+
+		logger.info(`Token de acceso refrescado para el usuario: ${currentPayload.username}`);
 		res.json({ accessToken, message: 'Token refrescado exitosamente' });
 	} catch (error) {
 		logger.warn(`Intento de refrescar token fallido: ${error}`);
@@ -89,14 +110,14 @@ export const refreshToken = (req: Request, res: Response) => {
 export const logout = (_req: Request, res: Response) => {
 	try {
 		// Limpiar la cookie del refresh token
-		res.clearCookie('jwt-refresh-token', {
+		res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
 			httpOnly: true,
 			sameSite: 'lax', // Debe coincidir con la configuración de la cookie al crearla
 			secure: false, // Debe coincidir con la configuración de la cookie al crearla
 		});
 
 		// Limpiar la cookie del access token
-		res.clearCookie('jwt-access-token', {
+		res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
 			httpOnly: false,
 			sameSite: 'lax',
 			secure: false,

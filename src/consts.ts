@@ -60,3 +60,8 @@ export const METADATA_RANGE = 'Metadatos!A1' as const;
 
 // Frecuencia con la que Node.js revisará el timestamp (en milisegundos)
 export const POLLING_INTERVAL_MS = 10000 as const; // Cada 10 segundos
+
+
+export const REFRESH_TOKEN_COOKIE_NAME = 'jwt-refresh-token' as const; // La cookie HttpOnly que establece tu backend
+export const ACCESS_TOKEN_COOKIE_NAME = 'jwt-access-token' as const;
+
