@@ -136,17 +136,25 @@ Estos endpoints requieren que el usuario esté autenticado con un `accessToken` 
   - **`200 OK`**: El inventario se actualizó correctamente.
 
     ```json
-    {  
-      "id": "androidId", // El ID que la web enviará como target_device_id
-      "equipo": "FME0003",
-      "modelo": "TCH002",
-      "usuario": "Juan Gonzales",
-      "correo": "example@example.com",
-      "aliasUsuario": "Otro nombre",
-      "ip": "192.168.15.189",
-      "macAddress": "D0:4E:50:F8:63:E2",
-      "isConnected": true | false,
-    }
+    [
+      {  
+        "id": "androidId", // El ID que la web enviará como target_device_id
+        "equipo": "FME0003",
+        "modelo": "TCH002",
+        "usuario": "Juan Gonzales",
+        "correo": "example@example.com",
+        "aliasUsuario": "Otro nombre",
+        "ip": "192.168.15.189",
+        "macAddress": "D0:4E:50:F8:63:E2",
+        "isConnected": true | false,
+      },
+      {
+        "id": "androidId2", 
+        "equipo": "TCH002", 
+        "isConnected": false
+        ...
+      }
+    ]
     ```
 
   - **`500 Internal Server Error`**: Ocurrió un error en el servidor al intentar
