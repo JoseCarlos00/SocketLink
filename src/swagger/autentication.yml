@@ -15,8 +15,11 @@ paths:
     post:
       tags:
         - Autenticación
-      summary: Autentica un usuario y devuelve un accessToken
-      description: Autentica a un usuario con su nombre de usuario y contraseña. Si las credenciales son correctas, devuelve un accessToken para ser usado en peticiones protegidas y establece una cookie httpOnly con el refreshToken para poder renovar la sesión.
+      summary: Autentica un usuario, devuelve tokens y establece cookies
+      description: |-
+        Autentica a un usuario con su nombre de usuario y contraseña. Si las credenciales son correctas, devuelve un `accessToken` y establece dos cookies:
+        1. `jwt-refresh-token`: Cookie `HttpOnly` para renovar la sesión de forma segura.
+        2. `jwt-access-token`: Cookie accesible por el cliente (ej. un servidor Next.js) para gestionar la autenticación.
       requestBody:
         description: Credenciales del usuario para iniciar sesión
         required: true
@@ -69,7 +72,7 @@ paths:
       summary: Renueva un accessToken expirado usando el refreshToken
       description: |-
         Renueva un accessToken expirado.
-        **Requiere** que la cookie `refreshToken` (obtenida durante el login) sea enviada en la petición.
+        **Requiere** que la cookie `jwt-refresh-token` (obtenida durante el login) sea enviada en la petición.
         *Nota sobre el Refresh Token: Su único propósito es obtener un nuevo accessToken. No se puede usar para acceder a datos.*
       requestBody:
         # Se indica que no requiere cuerpo de petición, pero se requiere la cookie
@@ -105,8 +108,8 @@ paths:
     post:
       tags:
         - Autenticación
-      summary: Cierra la sesión del usuario
-      description: Cierra la sesión del usuario invalidando el refreshToken e instruyendo al navegador para que elimine la cookie.
+      summary: Cierra la sesión del usuario y elimina las cookies de autenticación
+      description: Cierra la sesión del usuario instruyendo al navegador para que elimine las cookies `jwt-refresh-token` y `jwt-access-token`.
       requestBody:
         content: {} # No requiere payload
       responses:
@@ -163,4 +166,3 @@ components:
         message:
           type: string
           description: Mensaje de error detallado.
-

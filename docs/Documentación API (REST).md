@@ -7,8 +7,12 @@ A continuación se detallan los puntos de acceso (endpoints) disponibles en la A
 ### `POST /api/auth/login`
 
 - **Método**: `POST`
-- **Middleware**: ninguno.
-- **Descripción**: Autentica a un usuario con su nombre de usuario y contraseña. Si las credenciales son correctas, devuelve un `accessToken` para ser usado en peticiones protegidas y establece una cookie `httpOnly` con el `refreshToken` para poder renovar la sesión.
+- **Middleware**: Ninguno.
+- **Descripción**: Autentica a un usuario. Si las credenciales son correctas, realiza dos acciones:
+  1. Devuelve un `accessToken` en el cuerpo de la respuesta.
+  2. Establece dos cookies en el navegador:
+      - `jwt-refresh-token`: Una cookie `HttpOnly` que contiene el token para renovar la sesión.
+      - `jwt-access-token`: Una cookie accesible por JavaScript (para ser leída por el servidor de Next.js) que contiene el `accessToken`.
 
 - **Payload**
 
@@ -52,8 +56,8 @@ A continuación se detallan los puntos de acceso (endpoints) disponibles en la A
 ### `POST /api/auth/refresh`
 
 - **Método**: `POST`
-- **Middleware**: ninguno.
-- **Descripción**: Renueva un `accessToken` expirado. Requiere que la cookie `refreshToken` (obtenida durante el login) sea enviada en la petición.
+- **Middleware**: Ninguno.
+- **Descripción**: Renueva un `accessToken` expirado. Requiere que la cookie `jwt-refresh-token` (obtenida durante el login) sea enviada automáticamente por el navegador en la petición.
 - **Payload**: Ninguno.
 - **Respuestas**:
   - **`200 OK`**: Token refrescado exitosamente.
@@ -65,7 +69,7 @@ A continuación se detallan los puntos de acceso (endpoints) disponibles en la A
       }
     ```
 
-  - **`401 Unauthorized`**: La cookie `refreshToken` no fue encontrada en la petición.
+  - **`401 Unauthorized`**: La cookie `jwt-refresh-token` no fue encontrada en la petición.
 
     ```json
       { "message": "Falta el token de actualización" }
@@ -88,8 +92,8 @@ El `refreshToken` trabaja en conjunto con el `accessToken`. Piensa en ellos así
 ### `POST /api/auth/logout`
 
 - **Método**: `POST`
-- **Middleware**: ninguno.
-- **Descripción**: Cierra la sesión del usuario invalidando el `refreshToken`. El servidor instruye al navegador para que elimine la cookie.
+- **Middleware**: Ninguno.
+- **Descripción**: Cierra la sesión del usuario. El servidor instruye al navegador para que elimine las cookies `jwt-refresh-token` y `jwt-access-token`.
 - **Payload**: Ninguno.
 - **Respuestas**:
   - **`200 OK`**: Sesión cerrada correctamente.
