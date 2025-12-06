@@ -4,7 +4,7 @@ import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 import { adminLogger as logger } from '../services/logger.js';
 
-import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME} from "../consts.js";
+import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME} from "../constants.js";
 
 export const login = async (req: Request, res: Response) => {
 	if (!req.body) {

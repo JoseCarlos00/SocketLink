@@ -1,6 +1,6 @@
 import type { AppIO, AppSocket } from '../types/socketInterface.d.ts';
 import { socketLogger } from '../services/logger.js';
-import { receivedEventsApp, receivedEventWeb } from '../consts.js';
+import { receivedEventsApp, receivedEventWeb } from '../constants.js';
 import {
 	handleDeviceDisconnect,
 	handleDeviceRegistration,

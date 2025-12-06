@@ -39,6 +39,9 @@ const format = winston.format.combine(
 
 // Define los "transportes" (dónde se guardarán los logs).
 const transports = [
+	// Transporte para la consola.
+	new winston.transports.Console(),
+	
 	// Transporte para rotar los logs de errores.
 	new DailyRotateFile({
 		level: 'error',

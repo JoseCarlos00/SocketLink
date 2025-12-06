@@ -7,7 +7,7 @@ import {
 	SPREAD_SHEET_ID,
 	IP_COLUMN,
 	ANDROID_ID_COLUMN,
-} from '../consts.js';
+} from '../constants.js';
 import type { MappingData } from '../types/inventory.d.ts';
 
 const sheetsAuth = new google.auth.JWT(SERVICE_ACCOUNT.client_email, undefined, SERVICE_ACCOUNT.private_key, [

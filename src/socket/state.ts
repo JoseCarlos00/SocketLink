@@ -1,5 +1,5 @@
 import { getCriticalMappingData, getMetadataTimestamp } from '../services/googleSheetService.js';
-import { SPREAD_SHEET_ID, POLLING_INTERVAL_MS, roomsName, submittedEventWeb } from '../consts.js';
+import { SPREAD_SHEET_ID, POLLING_INTERVAL_MS, roomsName, submittedEventWeb } from '../constants.js';
 import { cacheLogger as logger } from '../services/logger.js';
 import type {  MappingData } from '../types/inventory.d.ts';
 import type { AppIO } from '../types/socketInterface.d.ts';

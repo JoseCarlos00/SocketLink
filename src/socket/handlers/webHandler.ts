@@ -1,5 +1,5 @@
 import type { AppIO, AppSocket } from '../../types/socketInterface.d.ts';
-import { roomsName, submittedEventsApp, clientType, submittedEventWeb } from '../../consts.js';
+import { roomsName, submittedEventsApp, clientType, submittedEventWeb } from '../../constants.js';
 import { webLogger as logger } from '../../services/logger.js';
 import { activeConnections } from '../state.js';
 import type {
