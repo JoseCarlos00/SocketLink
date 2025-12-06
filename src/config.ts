@@ -20,6 +20,7 @@ export const config = {
 	REFRESH_TOKEN_EXPIRE: getEnvVar('REFRESH_TOKEN_EXPIRE'),
 	PORT: getEnvVar('PORT') || 3000,
 	CORS_ORIGIN: getEnvVar('CORS_ORIGIN') || '*',
+	CORS_ORIGIN_NEXT: getEnvVar('CORS_ORIGIN_NEXT') || 'http://localhost:3000',
 	API_SECRET_TOKEN: getEnvVar('API_SECRET_TOKEN'),
 	NODE_ENV: getEnvVar('NODE_ENV') || 'development'	,
 

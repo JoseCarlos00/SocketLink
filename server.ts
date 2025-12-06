@@ -35,7 +35,7 @@ function configureApp(): express.Application {
 	// Configura el middleware de CORS para todas las rutas HTTP
 	app.use(
 		cors({
-			origin: config.CORS_ORIGIN, // Reutiliza la configuración de origen de CORS
+			origin: config.CORS_ORIGIN_NEXT, // Reutiliza la configuración de origen de CORS
 			credentials: true, // Permite el envío de cookies (útil para /auth/refresh)
 		})
 	);
