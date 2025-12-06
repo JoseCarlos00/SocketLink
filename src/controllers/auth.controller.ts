@@ -36,11 +36,19 @@ export const login = async (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(payload);
 		const refreshToken = generateRefreshToken(payload);
 
-		res.cookie('refreshToken', refreshToken, {
+		res.cookie('jwt-refresh-token', refreshToken, {
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: false,
 			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+		});
+
+		// Cookie para el Access Token (accesible por el servidor de Next.js)
+		res.cookie('jwt-access-token', accessToken, {
+			httpOnly: false, // Para que el servidor Next.js pueda leerla
+			sameSite: 'lax',
+			secure: false,
+			maxAge: 15 * 60 * 1000, // 15 minutos (debe coincidir con la expiración del token)
 		});
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
@@ -80,13 +88,21 @@ export const refreshToken = (req: Request, res: Response) => {
 
 export const logout = (_req: Request, res: Response) => {
 	try {
-		res.clearCookie('refreshToken', {
+		// Limpiar la cookie del refresh token
+		res.clearCookie('jwt-refresh-token', {
 			httpOnly: true,
 			sameSite: 'lax', // Debe coincidir con la configuración de la cookie al crearla
 			secure: false, // Debe coincidir con la configuración de la cookie al crearla
 		});
 
-		logger.info('Sesión cerrada exitosamente. Cookie de refreshToken eliminada.');
+		// Limpiar la cookie del access token
+		res.clearCookie('jwt-access-token', {
+			httpOnly: false,
+			sameSite: 'lax',
+			secure: false,
+		});
+
+		logger.info('Sesión cerrada exitosamente. Cookies eliminadas.');
 		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
 	} catch (error) {
 		logger.error(`Error durante el cierre de sesión: ${error}`);
