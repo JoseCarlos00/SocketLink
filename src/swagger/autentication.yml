@@ -133,6 +133,38 @@ paths:
               example:
                 message: Error interno del servidor.
 
+  /auth/me:
+    get:
+      tags:
+        - Autenticación
+      summary: Obtiene los datos del usuario autenticado actualmente
+      description: |-
+        Devuelve la información del perfil del usuario correspondiente al `accessToken` proporcionado.
+        Este es el método recomendado para que el frontend obtenga los datos del usuario (rol, nombre, etc.) de forma segura y actualizada.
+      security:
+        - BearerAuth: [] # Indica que requiere autenticación
+      responses:
+        '200':
+          description: Perfil del usuario obtenido con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserObject' # Reutilizamos el esquema de usuario
+              example:
+                id: 123
+                username: test_user
+                role: USER
+        '401':
+          description: Token no proporcionado o inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              example:
+                message: Token de acceso ausente o con formato incorrecto.
+        '404':
+          description: El usuario asociado al token ya no existe.
+
 # Definición de componentes reusables (Esquemas de datos)
 components:
   schemas:
@@ -166,3 +198,17 @@ components:
         message:
           type: string
           description: Mensaje de error detallado.
+    UserRole:
+      type: string
+      enum: [ADMIN, USER, SUPER_USER]
+      description: Rol del usuario.
+    UserObject:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+      required: [id, username, role]

@@ -3,6 +3,7 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import swaggerUi from 'swagger-ui-express'
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import Logger from './src/services/logger.js';
 import swaggerSpec  from './src/swagger.js';
@@ -39,7 +40,9 @@ function configureApp(): express.Application {
 			credentials: true, // Permite el envío de cookies (útil para /auth/refresh)
 		})
 	);
+
 	app.use(express.json());
+	app.use(cookieParser());
 
 	app.use((req, res, next) => {
 		Logger.http(`Request: ${req.method} ${req.originalUrl}`, { ip: req.ip });

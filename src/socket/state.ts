@@ -21,19 +21,20 @@ async function loadAndSetCache() {
 
 		data.forEach((row) => {
 			const ip = row[8];
+			const columnIndex = row[0];
 
-			if (ip) {
+			if (ip && columnIndex) {
 				// Mapea el ID_Android a un objeto de datos
 				fixedMappingCache.set(ip, {
-					index: row[0] ?? null,
+					index: columnIndex,
 					equipo: row[3] ?? 'N/A',
 					modelo: row[4] ?? 'N/A',
 					usuario: row[5] ?? 'N/A',
 					correo: row[6] ?? 'N/A',
-					aliasUsuario: row[7] ?? 'N/A',
+					aliasUsuario: row[7] ?? null,
 					ip: ip,
 					macAddress: row[9] ?? 'N/A',
-					androidId: row[10] ?? 'N/A',
+					androidId: row[10] ?? null,
 				} as MappingData);
 			}
 		});
