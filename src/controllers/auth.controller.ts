@@ -50,7 +50,7 @@ export const login = async (req: Request, res: Response) => {
 			httpOnly: false, // Para que el servidor Next.js pueda leerla
 			sameSite: 'lax',
 			secure: false,
-			maxAge: 15 * 60 * 1000, // 15 minutos (debe coincidir con la expiración del token)
+			maxAge: 15 * 60 * 1000,
 		});
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
@@ -64,7 +64,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const refreshToken = (req: Request, res: Response) => {
 	// 1. Corregir el nombre de la cookie que se lee.
-	const token = req?.cookies?.['jwt-refresh-token'];
+	const token = req?.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
 
 	if (!token) {
 		return res.status(401).json({ message: 'Falta el token de actualización' });
@@ -96,7 +96,7 @@ export const refreshToken = (req: Request, res: Response) => {
 			httpOnly: false,
 			sameSite: 'lax',
 			secure: false, // Cambiar a true en producción
-			maxAge: 15 * 60 * 1000, // 15 minutos
+			maxAge: 15 * 60 * 1000,
 		});
 
 		logger.info(`Token de acceso refrescado para el usuario: ${currentPayload.username}`);
@@ -127,6 +127,31 @@ export const logout = (_req: Request, res: Response) => {
 		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
 	} catch (error) {
 		logger.error(`Error durante el cierre de sesión: ${error}`);
+		res.status(500).json({ message: 'Error interno del servidor' });
+	}
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+	// El middleware 'verifyToken' ya ha validado el token y ha adjuntado el payload a req.user.
+	// No necesitamos volver a buscar el usuario si el payload del token es suficiente.
+	// Sin embargo, para obtener datos 100% actualizados, es mejor hacer una consulta a la BD.
+
+	// Asumimos que el middleware verifyToken añade el payload a req.user
+	const userId = (req.currentUser as AuthPayload)?.id;
+
+	if (!userId) {
+		// Esto no debería ocurrir si el middleware funciona correctamente.
+		return res.status(401).json({ message: 'Usuario no autenticado en la petición.' });
+	}
+
+	try {
+		const user = UserModel.findById(userId) as UserType | undefined;
+		if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+
+		// Devolvemos solo los datos seguros y necesarios para el frontend.
+		res.json({ id: user.id, username: user.username, role: user.role });
+	} catch (error) {
+		logger.error(`Error al obtener el perfil del usuario ${userId}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
