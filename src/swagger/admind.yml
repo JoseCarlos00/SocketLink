@@ -420,7 +420,7 @@ components:
           
     UserRole:
       type: string
-      enum: [ADMIN, USER]
+      enum: [SUPER_ADMIN, ADMIN, USER]
       description: Rol del usuario en el sistema.
 
     UserObject:

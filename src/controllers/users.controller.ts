@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import { adminLogger as logger } from '../services/logger.js';
-import type { User as UserType } from '../types/user.d.ts';
+import type { User as UserType, UserRole } from '../types/user.d.ts';
 
 type UpdateUser = Pick<UserType, 'username' | 'role'>;
+
+const VALID_ROLES: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'USER'];
 
 const usernameExists = (username: string) => {
 	const user = UserModel.findByUsername(username);
@@ -55,8 +57,8 @@ export const registerUser = async (req: Request, res: Response) => {
 			return res.status(400).json({ message: 'Username, password y role son requeridos.' });
 		}
 
-		if (role !== 'ADMIN' && role !== 'USER') {
-			return res.status(400).json({ message: 'El rol debe ser ADMIN o USER.' });
+		if (!VALID_ROLES.includes(role)) {
+			return res.status(400).json({ message: `El rol debe ser uno de: ${VALID_ROLES.join(', ')}.` });
 		}
 
 		if (usernameExists(username)) {
@@ -137,8 +139,8 @@ export const updateUser = async (req: Request, res: Response) => {
 			}
 		}
 
-		if (role && role !== 'ADMIN' && role !== 'USER') {
-			return res.status(400).json({ message: 'El rol debe ser ADMIN o USER.' });
+		if (role && !VALID_ROLES.includes(role)) {
+			return res.status(400).json({ message: `El rol debe ser uno de: ${VALID_ROLES.join(', ')}.` });
 		}
 
 		// Construir el objeto con los datos a actualizar

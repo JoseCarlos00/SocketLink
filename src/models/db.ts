@@ -33,7 +33,7 @@ export function initializeDatabase() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            role TEXT NOT NULL CHECK(role IN ('ADMIN', 'USER'))
+            role TEXT NOT NULL CHECK(role IN ('ADMIN', 'USER', 'SUPER_ADMIN'))
         )
     `);
 	createUserTable.run();
