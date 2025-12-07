@@ -9,7 +9,8 @@ export function getRegisteredDevicesList(req: any, res: any) {
 	try {
 		// Transforma el Map a un array de objetos para la respuesta JSON.
 		const devicesList = Array.from(fixedMappingCache.values()).map((device) => ({
-			id: device.androidId, // El ID que la web enviará como target_device_id
+			id: device.androidId ?? `index-${device.index}`,
+			androidId: device.androidId,
 			equipo: device.equipo,
 			modelo: device.modelo,
 			usuario: device.usuario,
