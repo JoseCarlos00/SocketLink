@@ -7,8 +7,8 @@ import cookieParser from 'cookie-parser';
 
 import Logger from './src/services/logger.js';
 import swaggerSpec  from './src/swagger.js';
-import { config } from './src/config.js';
-import { startSheetsPolling } from './src/socket/state.js';
+import { config } from './src/config.js'; 
+import { loadAndSetCache, startSheetsPolling } from './src/socket/state.js';
 import { initializeDatabase } from './src/models/db.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
 
@@ -35,8 +35,8 @@ function configureApp(): express.Application {
 	const app = express();
 	// Configura el middleware de CORS para todas las rutas HTTP
 	app.use(
-		cors({
-			origin: config.CORS_ORIGIN_NEXT, // Reutiliza la configuración de origen de CORS
+		cors({ // Ahora usa la configuración centralizada
+			origin: config.CORS_ORIGIN,
 			credentials: true, // Permite el envío de cookies (útil para /auth/refresh)
 		})
 	);
@@ -60,11 +60,15 @@ function configureApp(): express.Application {
 function configureSocketIO(server: http.Server): SocketIOServer {
 	// Establece un timeout global para los acknowledgements.
 	const io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
-	cors: {
-		origin: config.CORS_ORIGIN,
-		methods: ['GET', 'POST'],
-	},
-});
+		cors: {
+			origin: config.CORS_ORIGIN,
+			credentials: true,
+			methods: ['GET', 'POST'],
+		},
+		// Aumentar los timeouts (valores en ms)
+		pingTimeout: 30000, // 30 segundos (default es 20000)
+		pingInterval: 15000, // 15 segundos (default es 25000)
+	});
 	return io;
 }
 
@@ -101,11 +105,16 @@ initializeSocketLogic(io);
 
 async function startServer() {
 	try {
-		startSheetsPolling(io);
-		Logger.info('Monitoreo de Google Sheets (Polling) iniciado.');
+		// 1. Cargar la caché de forma síncrona antes de iniciar el servidor.
+		// Si esto falla, el servidor no se iniciará gracias al 'throw' en loadAndSetCache.
+		await loadAndSetCache();
 
+		// 2. Iniciar el servidor para que comience a aceptar conexiones.
 		server.listen(config.PORT, () => {
 			Logger.info(`Servidor Socket.IO/Express escuchando en el puerto ${config.PORT}`);
+			// 3. Una vez que el servidor está escuchando, iniciar el polling para futuras actualizaciones.
+			startSheetsPolling(io);
+			Logger.info('Monitoreo de Google Sheets (Polling) iniciado para detectar futuras actualizaciones.');
 		});
 	} catch (error) {
 		Logger.error(`Error fatal al iniciar el servidor: ${error instanceof Error ? error.message : error}`);

@@ -14,9 +14,12 @@ let lastKnownTimestamp: string | undefined;
 
 /**
  * Carga los datos críticos de Sheets y actualiza la caché A.
+ * También obtiene y establece la marca de tiempo inicial de los metadatos.
  */
-async function loadAndSetCache() {
+export async function loadAndSetCache() {
 	try {
+		logger.info('Iniciando carga de la caché de inventario desde Google Sheets...');
+
 		const data = await getCriticalMappingData(SPREAD_SHEET_ID);
 
 		data.forEach((row) => {
@@ -40,28 +43,27 @@ async function loadAndSetCache() {
 		});
 
 
-		logger.info(`Caché de inventario cargada con ${fixedMappingCache.size} entradas.`);
+		// Después de cargar los datos, obtenemos el timestamp para evitar una recarga inmediata.
+		lastKnownTimestamp = await getMetadataTimestamp(SPREAD_SHEET_ID);
+		logger.info(`Caché de inventario cargada con ${fixedMappingCache.size} entradas. Timestamp inicial: ${lastKnownTimestamp}`);
 	} catch (error) {
-		logger.error(`Error al cargar los datos de Sheets: ${error}`);
+		logger.error(`Error crítico al cargar la caché de inventario: ${error}`);
+		throw error; // Relanzamos el error para que el servidor no inicie si la caché falla.
 	}
 }
 
 /**
  * Inicia el polling para revisar el timestamp de Google Sheets.
+ * Esta función debe llamarse DESPUÉS de que el servidor esté escuchando.
  */
 export function startSheetsPolling(io: AppIO) {
-	// Realiza la primera carga al iniciar
-	loadAndSetCache();
-
-	// Establece el intervalo para el polling del timestamp
 	setInterval(async () => {
 		try {
 			const currentTimestamp = await getMetadataTimestamp(SPREAD_SHEET_ID);
 
 			if (currentTimestamp && currentTimestamp !== lastKnownTimestamp) {
-				logger.info('¡Timestamp de Sheets cambiado! Recargando caché de inventario...');
+				logger.info(`Timestamp de Sheets cambiado (${lastKnownTimestamp} -> ${currentTimestamp}). Recargando caché...`);
 				await loadAndSetCache();
-				lastKnownTimestamp = currentTimestamp;
 
 				// Notificar a los clientes web sobre la actualización
 				io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.INVENTORY_UPDATE_ALERT, { message: 'El inventario ha sido actualizado.'});

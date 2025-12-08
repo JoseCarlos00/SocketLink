@@ -13,14 +13,22 @@ function getEnvVar(key: string): string {
 	return value;
 }
 
+const allowedOrigins = [
+	'http://localhost:3000', // Tu Next.js de desarrollo
+	'http://localhost:3001', // Si Next.js sube en 3001
+	'http://192.168.15.189:3000', // Si pruebas en la red local
+	'http://192.168.15.190:3000', // Si pruebas en la red local
+	'http://192.168.15.189:3001', // Si pruebas en la red local
+	'https://app.tusitioproduccion.com', // Tu dominio de producción
+]; // Puedes agregar más orígenes aquí
+
 export const config = {
 	JWT_SECRET: getEnvVar('JWT_SECRET'),
 	JWT_REFRESH_SECRET: getEnvVar('JWT_REFRESH_SECRET'),
 	ACCESS_TOKEN_EXPIRE: getEnvVar('ACCESS_TOKEN_EXPIRE'),
 	REFRESH_TOKEN_EXPIRE: getEnvVar('REFRESH_TOKEN_EXPIRE'),
 	PORT: getEnvVar('PORT') || 3000,
-	CORS_ORIGIN: getEnvVar('CORS_ORIGIN') || '*',
-	CORS_ORIGIN_NEXT: getEnvVar('CORS_ORIGIN_NEXT') || 'http://localhost:3000',
+	CORS_ORIGIN: allowedOrigins,
 	API_SECRET_TOKEN: getEnvVar('API_SECRET_TOKEN'),
 	NODE_ENV: getEnvVar('NODE_ENV') || 'development'	,
 
