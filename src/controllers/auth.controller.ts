@@ -6,6 +6,10 @@ import { adminLogger as logger } from '../services/logger.js';
 
 import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME} from "../constants.js";
 
+const timeExpireAccessToken = 1 * 60 * 1000; // 15 minutos
+const timeExpireRefreshToken = 7 * 24 * 60 * 60 * 1000; // 7 días
+
+
 export const login = async (req: Request, res: Response) => {
 	if (!req.body) {
 		return res.status(400).json({ message: 'Falta el body de la request.' });
@@ -42,15 +46,15 @@ export const login = async (req: Request, res: Response) => {
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: false,
-			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+			maxAge: timeExpireRefreshToken
 		});
 
 		// Cookie para el Access Token (accesible por el servidor de Next.js)
 		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
-			httpOnly: false, // Para que el servidor Next.js pueda leerla
+			httpOnly: true,
 			sameSite: 'lax',
 			secure: false,
-			maxAge: 15 * 60 * 1000,
+			maxAge: timeExpireAccessToken,
 		});
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
@@ -88,15 +92,15 @@ export const refreshToken = (req: Request, res: Response) => {
 		res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, {
 			httpOnly: true,
 			sameSite: 'lax',
-			secure: false, // Cambiar a true en producción
-			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+			secure: false,
+			maxAge: timeExpireRefreshToken
 		});
 
 		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
-			httpOnly: false,
+			httpOnly: true,
 			sameSite: 'lax',
-			secure: false, // Cambiar a true en producción
-			maxAge: 15 * 60 * 1000,
+			secure: false,
+			maxAge: timeExpireAccessToken,
 		});
 
 		logger.info(`Token de acceso refrescado para el usuario: ${currentPayload.username}`);
