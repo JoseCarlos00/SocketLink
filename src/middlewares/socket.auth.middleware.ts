@@ -3,6 +3,8 @@ import { config } from '../config.js';
 import { User as UserModel } from '../models/user.model.js';
 import type { AppSocket } from '../types/socketInterface.d.ts';
 import type { AuthPayload, User as UserType } from '../types/user.d.ts';
+import { REFRESH_TOKEN_COOKIE_NAME } from "../constants.js";
+import { socketLogger as logger } from "../services/logger.js";
 
 const validClientTypes = ['WEB_CLIENT', 'ANDROID_APP'];
 const ANDROID_API_KEY = process.env.ANDROID_API_KEY;
@@ -35,24 +37,40 @@ export const socketAuthMiddleware = async (socket: AppSocket, next: (err?: Error
 
 	// --- Autenticación para clientes Web con JWT ---
 	if (type === 'WEB_CLIENT') {
-		const token = socket.handshake.auth.token;
-		if (!token) {
-			return next(new Error('Authentication error: No token provided.'));
+		// Extraemos las cookies de la petición de handshake
+		const cookies = socket.handshake.headers.cookie;
+		if (!cookies) {
+			logger.error('No se encontraron cookies de autenticación.');
+			return next(new Error('No se encontraron cookies de autenticación.'));
 		}
 
 		try {
-			const decoded = jwt.verify(token, config.JWT_SECRET) as AuthPayload;
+			const refreshTokenCookie = cookies
+				.split(';')
+				.find(c => c.trim().startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`));
+
+			// 2. Extraer el valor del token.
+			const refreshToken = refreshTokenCookie ? refreshTokenCookie.split('=')[1] : undefined;
+
+			if (!refreshToken) {
+				return next(new Error('Falta el refresh token.'));
+			}
+
+
+			const decoded = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET) as AuthPayload;
 			const user = UserModel.findById(decoded.id);
 
 			if (!user) {
-				return next(new Error('Authentication error: User not found.'));
+				logger.error('Usuario no encontrado.');
+				throw new Error('Usuario no encontrado.');
 			}
 
 			socket.currentUser = user as UserType;
 			return next();
 		} catch (error) {
-			return next(new Error('Authentication error: Invalid or expired token.'));
+			return next(new Error('Refresh token inválido o expirado.'));
 		}
 	}
+	logger.error('Authentication error: Unknown client type.');
 	return next(new Error('Authentication error: Unknown client type.'));
 };

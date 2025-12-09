@@ -1,6 +1,6 @@
 import type { JwtPayload } from 'jsonwebtoken';
 
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'USER';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'USER' | 'OPERATOR';
 
 /**
  * Representa la estructura de un usuario tal como se almacena en la base de datos.

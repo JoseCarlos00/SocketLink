@@ -4,6 +4,7 @@ import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';
 import { adminLogger as logger } from '../services/logger.js';
 
+import { config } from '../config.js';
 import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME} from "../constants.js";
 
 const timeExpireAccessToken = 1 * 60 * 1000; // 15 minutos
@@ -42,24 +43,26 @@ export const login = async (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(payload);
 		const refreshToken = generateRefreshToken(payload);
 
+		const isProduction = config.NODE_ENV === 'production';
+
 		res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
 			httpOnly: true,
-			sameSite: 'lax',
-			secure: false,
+			sameSite: isProduction ? 'none' : 'lax',
+			secure: isProduction,
 			maxAge: timeExpireRefreshToken
 		});
 
 		// Cookie para el Access Token (accesible por el servidor de Next.js)
 		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
 			httpOnly: true,
-			sameSite: 'lax',
-			secure: false,
+			sameSite: isProduction ? 'none' : 'lax',
+			secure: isProduction,
 			maxAge: timeExpireAccessToken,
 		});
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
 		logger.info(`Inicio de sesión exitoso para el usuario: ${username}`);
-		res.json({ accessToken, message: 'Inicio de sesión exitoso' });
+		res.json({ message: 'Inicio de sesión exitoso' });
 	} catch (error) {
 		logger.error(`Error en el proceso de login para ${username}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
@@ -88,18 +91,20 @@ export const refreshToken = (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(newPayload);
 		const newRefreshToken = generateRefreshToken(newPayload);
 
+		const isProduction = config.NODE_ENV === 'production';
+
 		// 4. Actualizar ambas cookies, igual que en el login.
 		res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, {
 			httpOnly: true,
-			sameSite: 'lax',
-			secure: false,
-			maxAge: timeExpireRefreshToken
+			sameSite: isProduction ? 'none' : 'lax',
+			secure: isProduction,
+			maxAge: timeExpireRefreshToken,
 		});
 
 		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
 			httpOnly: true,
-			sameSite: 'lax',
-			secure: false,
+			sameSite: isProduction ? 'none' : 'lax',
+			secure: isProduction,
 			maxAge: timeExpireAccessToken,
 		});
 
@@ -113,34 +118,32 @@ export const refreshToken = (req: Request, res: Response) => {
 
 export const logout = (_req: Request, res: Response) => {
 	try {
+		const isProduction = config.NODE_ENV === 'production';
+
 		// Limpiar la cookie del refresh token
 		res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
 			httpOnly: true,
-			sameSite: 'lax', // Debe coincidir con la configuración de la cookie al crearla
-			secure: false, // Debe coincidir con la configuración de la cookie al crearla
+			sameSite: isProduction ? 'none' : 'lax',
+			secure: isProduction,
 		});
 
 		// Limpiar la cookie del access token
 		res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
-			httpOnly: false,
-			sameSite: 'lax',
-			secure: false,
+			httpOnly: true,
+			sameSite: isProduction ? 'none' : 'lax',
+			secure: isProduction,
 		});
 
 		logger.info('Sesión cerrada exitosamente. Cookies eliminadas.');
-		res.status(200).json({ message: 'Sesión cerrada exitosamente' });
+		res.status(200).json({ message: 'Sesión cerrada correctamente' });
 	} catch (error) {
-		logger.error(`Error durante el cierre de sesión: ${error}`);
+		logger.error(`Error en logout: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
 	}
 };
 
 export const getProfile = async (req: Request, res: Response) => {
-	// El middleware 'verifyToken' ya ha validado el token y ha adjuntado el payload a req.user.
-	// No necesitamos volver a buscar el usuario si el payload del token es suficiente.
-	// Sin embargo, para obtener datos 100% actualizados, es mejor hacer una consulta a la BD.
-
-	// Asumimos que el middleware verifyToken añade el payload a req.user
+	// Asumimos que el middleware verifyToken añade el payload a req.currentUser
 	const userId = (req.currentUser as AuthPayload)?.id;
 
 	if (!userId) {

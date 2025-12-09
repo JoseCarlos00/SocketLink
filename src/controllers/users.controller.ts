@@ -5,7 +5,7 @@ import type { User as UserType, UserRole } from '../types/user.d.ts';
 
 type UpdateUser = Pick<UserType, 'username' | 'role'>;
 
-const VALID_ROLES: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'USER'];
+const VALID_ROLES: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'USER', 'OPERATOR'];
 
 const usernameExists = (username: string) => {
 	const user = UserModel.findByUsername(username);
