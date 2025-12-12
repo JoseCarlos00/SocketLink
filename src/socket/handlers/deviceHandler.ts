@@ -51,11 +51,6 @@ export async function handleDeviceRegistration(socket: AppSocket, data: Register
 	socket.join(roomsName.ANDROID_APP);
 	activeConnections.set(androidId, socket.id); // Registra en Caché B
 
-	metricsManager.updateDeviceState(androidId, {
-		online: true,
-		lastSeen: Date.now(),
-	});
-
 	logger.info(`[REGISTRO] Dispositivo registrado. IP: ${ipAddress}, ID: ${androidId}`);
 	ack?.({ status: 'OK' });
 }
