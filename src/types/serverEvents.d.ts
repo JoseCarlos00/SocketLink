@@ -20,6 +20,7 @@ import type {
 	PingAck,
 	MaintenanceModeAck,
 	MaintenanceModePayload,
+	CheckForUpdateAck,
 } from './payloadsSendApp.d.ts';
 
 type SubmittedEventWebKeys = keyof typeof submittedEventWeb;
@@ -32,7 +33,7 @@ export interface ServerToClientEvents {
 
 	[serverToAppEvents.MESSAGE_RECEIVE]: (payload: MessagePayload, ack: MessageAck) => void;
 
-	[serverToAppEvents.CHECK_FOR_UPDATE]: (payload: null) => void;
+	[serverToAppEvents.CHECK_FOR_UPDATE]: (payload: null, ack: CheckForUpdateAck) => void;
 
 	[serverToAppEvents.GET_DEVICE_INFO]: (payload: null, ack: GetDeviceInfoAck) => void;
 

@@ -4,12 +4,15 @@ export interface AlarmPayload {
 	deviceAlias?: string; // default "desconocido"
 }
 
+// Status
+type ResponseSts = 'OK' | 'ERROR';
+
+
 // Respuesta:
 export interface AlarmResponse {
-	status: 'OK' | 'ERROR';
+	status: ResponseSts;
 	reason?: string;
 }
-
 
 export type AlarmAck = (response: AlarmResponse | null) => void;
 
@@ -30,14 +33,14 @@ export interface MessagePayload {
 
 // Respuesta:
 export interface MessageResponse {
-	status: 'OK' | 'ERROR';
+	status: ResponseSts;
 	reason?: string;
 }
 
 export type MessageAck = (response: MessageResponse | null) => void;
 
 // ===== CHECK_FOR_UPDATE =====
-// No payload, no respuesta
+export type CheckForUpdateAck = (response: ResponseSts | null) => void;
 
 // ===== GET_DEVICE_INFO =====
 export interface DeviceInfoResponse {
@@ -50,7 +53,7 @@ export interface DeviceInfoResponse {
 // MAINTENANCE MODE
 
 interface MaintenanceModeResponse {
-	status: 'OK' | 'ERROR';
+	status: ResponseSts;
 	reason?: string;
 	message?: string;
 }
