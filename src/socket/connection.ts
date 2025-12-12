@@ -17,13 +17,17 @@ import {
 	handleWebClientIdentification,
 } from './handlers/webHandler.js';
 
-import type { RegisterDevicePayload } from '../types/payloadsGetApp.d.ts'
 import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
+import { handleHeartbeatDevice } from './handlers/heartbeat.handler.js'
 
 function registerDeviceEventHandlers(socket: AppSocket) {
-	socket.on(appToServerEvents .REGISTER_DEVICE, (data: RegisterDevicePayload, ack) => {
+	socket.on(appToServerEvents.REGISTER_DEVICE, (data, ack) => {
 		handleDeviceRegistration(socket, data, ack);
 	});
+
+	socket.on(appToServerEvents.HEARTBEAT, (data, ask)=> {
+		handleHeartbeatDevice(socket, data, ask)
+	})
 }
 
 function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
