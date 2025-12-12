@@ -1,4 +1,4 @@
-import db from './db.js'; // Importar la instancia de la DB
+import db from '../database/connection.js'; // Importar la instancia de la DB
 import bcrypt from 'bcryptjs';
 import type { User as UserType } from "../types/user.d.ts";
 

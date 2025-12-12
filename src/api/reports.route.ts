@@ -1,10 +1,12 @@
+// src/routes/reports.ts
 import { Router } from 'express';
-import { metricsManager } from './../managers/metricsManager.js';
+import { metricsManager } from '../managers/metricsManager.js';
+import Logger from '../services/logger.js';
 
 const router = Router();
 
 /**
- * GET /api/reports/devices
+ * GET /api/reports/devices?days=30
  * Reporte de dispositivos perdidos y frecuencia de alarmas
  */
 router.get('/devices', (req, res) => {
@@ -12,12 +14,19 @@ router.get('/devices', (req, res) => {
 		const days = parseInt(req.query.days as string) || 30;
 		const report = metricsManager.getDeviceLossReport(days);
 
+		if (!report) {
+			return res.status(500).json({
+				success: false,
+				error: 'Error generando reporte de dispositivos',
+			});
+		}
+
 		res.json({
 			success: true,
 			data: report,
 		});
 	} catch (error) {
-		console.error('[API] Error en /devices:', error);
+		Logger.error(`[API] Error en /devices: ${error}`);
 		res.status(500).json({
 			success: false,
 			error: 'Error generando reporte de dispositivos',
@@ -33,12 +42,19 @@ router.get('/battery', (req, res) => {
 	try {
 		const report = metricsManager.getBatteryReport();
 
+		if (!report) {
+			return res.status(500).json({
+				success: false,
+				error: 'Error generando reporte de batería',
+			});
+		}
+
 		res.json({
 			success: true,
 			data: report,
 		});
 	} catch (error) {
-		console.error('[API] Error en /battery:', error);
+		Logger.error(`[API] Error en /battery: ${error}`);
 		res.status(500).json({
 			success: false,
 			error: 'Error generando reporte de batería',
@@ -47,7 +63,7 @@ router.get('/battery', (req, res) => {
 });
 
 /**
- * GET /api/reports/daily
+ * GET /api/reports/daily?days=7
  * Estadísticas diarias
  */
 router.get('/daily', (req, res) => {
@@ -60,7 +76,7 @@ router.get('/daily', (req, res) => {
 			data: report,
 		});
 	} catch (error) {
-		console.error('[API] Error en /daily:', error);
+		Logger.error(`[API] Error en /daily: ${error}`);
 		res.status(500).json({
 			success: false,
 			error: 'Error generando reporte diario',
@@ -87,7 +103,7 @@ router.get('/status', (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('[API] Error en /status:', error);
+		Logger.error(`[API] Error en /status: ${error}`);
 		res.status(500).json({
 			success: false,
 			error: 'Error obteniendo estado de dispositivos',
@@ -105,6 +121,13 @@ router.get('/summary', (req, res) => {
 		const batteryReport = metricsManager.getBatteryReport();
 		const dailyReport = metricsManager.getDailyReport(7);
 		const statusReport = metricsManager.getCurrentDeviceStates();
+
+		if (!deviceReport || !batteryReport) {
+			return res.status(500).json({
+				success: false,
+				error: 'Error generando resumen',
+			});
+		}
 
 		res.json({
 			success: true,
@@ -127,10 +150,63 @@ router.get('/summary', (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('[API] Error en /summary:', error);
+		Logger.error(`[API] Error en /summary: ${error}`);
 		res.status(500).json({
 			success: false,
 			error: 'Error generando resumen',
+		});
+	}
+});
+
+/**
+ * GET /api/reports/device/:deviceId/offline?days=30
+ * Historial de desconexiones de un dispositivo específico
+ */
+router.get('/device/:deviceId/offline', (req, res) => {
+	try {
+		const { deviceId } = req.params;
+		const days = parseInt(req.query.days as string) || 30;
+
+		const history = metricsManager.getOfflineHistory(deviceId, days);
+
+		res.json({
+			success: true,
+			data: {
+				deviceId,
+				period: `${days} días`,
+				events: history,
+			},
+		});
+	} catch (error) {
+		Logger.error(`[API] Error en /device/:deviceId/offline: ${error}`);
+		res.status(500).json({
+			success: false,
+			error: 'Error obteniendo historial offline',
+		});
+	}
+});
+
+/**E
+ * POST /api/reports/cleanup
+ * Limpia datos antiguos (requiere autenticación ADMIN)
+ */
+router.post('/cleanup', (req, res) => {
+	try {
+		// TODO: Agregar middleware de autenticación aquí
+		// if (req.user.role !== 'ADMIN') return res.status(403).json({...})
+
+		const daysToKeep = parseInt(req.body.daysToKeep) || 90;
+		metricsManager.cleanOldData(daysToKeep);
+
+		res.json({
+			success: true,
+			message: `Datos anteriores a ${daysToKeep} días eliminados`,
+		});
+	} catch (error) {
+		Logger.error(`[API] Error en /cleanup: ${error}`);
+		res.status(500).json({
+			success: false,
+			error: 'Error limpiando datos antiguos',
 		});
 	}
 });
