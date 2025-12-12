@@ -96,6 +96,9 @@ app.get('/', (req, res) => {
   });
 });
 
+app.use('/status', ((_, res) => {
+	res.status(200).json({ status: 'ACTIVE' });
+}))
 app.use('/api/auth', authApiRoutes);
 app.use('/api/users/me', verifyToken, getProfile); // Asumiendo que getProfile está en auth.controller
 app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
