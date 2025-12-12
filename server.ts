@@ -23,6 +23,8 @@ import { verifyToken } from './src/middlewares/verifyToken.js';
 import authApiRoutes from './src/api/auth.route.js';
 import usersApiRoutes from './src/api/users.route.js';
 import inventoryApiRoutes from './src/api/inventory.route.js';
+import reportsRoutes from './src/api/reports.route.js';
+
 import { getProfile } from './src/controllers/auth.controller.js'
 
 // 1. Inicializar la base de datos
@@ -101,8 +103,9 @@ app.use('/status', ((_, res) => {
 }))
 app.use('/api/auth', authApiRoutes);
 app.use('/api/users/me', verifyToken, getProfile); // Asumiendo que getProfile está en auth.controller
-app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
 app.use('/api/inventory', verifyToken, inventoryApiRoutes);
+app.use('/api/reports',verifyToken, checkSuperAdminRole, reportsRoutes);
+app.use('/api/admin/users', verifyToken, usersApiRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
