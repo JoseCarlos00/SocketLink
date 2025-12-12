@@ -29,3 +29,4 @@ export interface TargetedDevicePayload {
 export type AlarmActivationPayload = TargetedDevicePayload & AlarmPayload;
 export type SendMessagePayload = TargetedDevicePayload & { dataMessage: MessagePayload };
 export type SendAllMessagePayload = { dataMessage: MessagePayload };
+

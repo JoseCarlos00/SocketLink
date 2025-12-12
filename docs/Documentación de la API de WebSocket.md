@@ -2,13 +2,13 @@
 
 Esta es la guía de referencia para todos los eventos de WebSocket que la aplicación `AlertScanner` puede recibir y enviar.
 
-## Eventos Recibidos por la App (Server -> Client)
+## Eventos Recibidos por la App (Servidor -> Dispositivos Android)
 
 El servidor puede enviar los siguientes eventos a la aplicación.
 
 ---
 
-### `ALARM`
+### `ALARM_ACTIVATE`
 
 Activa una alarma crítica en el dispositivo. Este sonido es persistente, interrumpe el modo "No Molestar" y usa el volumen máximo.
 
@@ -43,7 +43,7 @@ Activa una alarma crítica en el dispositivo. Este sonido es persistente, interr
 
 ```JavaScript
      // Alarma simple de 10 segundos
-    socket.emit('ALARM', (success) => {
+    socket.emit('ALARM_ACTIVATE', (success) => {
       if (success) {
         console.log('La alarma se activó correctamente en el dispositivo.');
       } else {
@@ -52,7 +52,7 @@ Activa una alarma crítica en el dispositivo. Este sonido es persistente, interr
     });
 
     // Alarma personalizada
-    socket.emit('ALARM', {
+    socket.emit('ALARM_ACTIVATE', {
       durationSeconds: 30,
       deviceAlias: 'FME001'
     }, (success) => {
@@ -93,7 +93,7 @@ Duración del sonido `3 segundos` por defecto.
     });
 ```
 
-### `MESSAGE`
+### `MESSAGE_RECEIVE`
 
 Envía un mensaje de texto que genera una notificación push y una alerta sonora (única) de alta prioridad.
 
@@ -146,7 +146,7 @@ Envía un mensaje de texto que genera una notificación push y una alerta sonora
 - **Ejemplo de Uso (Node.js)**:
 
 ```JavaScript
-    socket.emit('MESSAGE', {
+    socket.emit('MESSAGE_RECEIVE', {
       message: 'Revisar el inventario de la bodega 3.',
       sender: 'Juan Pérez'
     });
@@ -191,7 +191,29 @@ Ordena a la aplicación que verifique si hay una nueva versión disponible en el
     
 ```
 
-## Eventos que Enviados por la App (Client -> Server)
+### `SET_MAINTENANCE_MODE`
+
+- **Descripción**: El servidor emite este evento a TODOS los dispositivos Android para informarles que entrará en modo mantenimiento. Los dispositivos deben desconectarse y programar un despertar automático.
+
+- **Payload**:
+
+```typescript
+  {
+    untilTimestampMs: number,     // Timestamp cuando terminará el mantenimiento
+    reason?: string,              // Razón del mantenimiento
+    estimatedDuration?: number    // Duración en segundos
+  }
+```
+
+- **Callback ACK**:
+
+```javascript
+  { "status": "OK", "message": "Entrando en modo mantenimiento" }
+```
+
+---
+
+## Eventos que Enviados por la App (Dispositivos Android → Servidor)
 
 La aplicación envía los siguientes eventos al servidor.
 
@@ -266,4 +288,29 @@ Esta respuesta se mostrara en la UI de la app
 
     ack.({ status: 'OK' })
   });
+```
+
+### `HEARTBEAT`
+
+- **Evento**: `HEARTBEAT`
+- **Descripción**: Los dispositivos Android envían periódicamente (cada 45s) su estado de salud al servidor.
+
+- **Payload**:
+
+```typescript
+  {
+    deviceId: string,
+    battery: number,      // 0-100
+    charging: boolean,
+    timestamp: number
+  }
+```
+
+- **Callback ACK** (opcional):
+
+```javascript
+  { 
+    "status": "OK", 
+    "serverTime": 1705123456789 
+  }
 ```

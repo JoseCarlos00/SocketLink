@@ -46,4 +46,19 @@ export interface DeviceInfoResponse {
 	appVersion: string;
 }
 
+
+// MAINTENANCE MODE
+
+interface MaintenanceModeResponse {
+	status: 'OK' | 'ERROR';
+	reason?: string;
+	message?: string;
+}
+
+export type MaintenanceModeAck = (response: MaintenanceModeResponse) => void;
+
+export interface MaintenanceModePayload {
+	untilTimestampMs: number; // Timestamp cuando terminará el mantenimiento
+}
+
 export type GetDeviceInfoAck = (info: DeviceInfoResponse | null) => void;

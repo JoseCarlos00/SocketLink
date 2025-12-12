@@ -1,5 +1,5 @@
 import type { AppIO, AppSocket } from '../../types/socketInterface.d.ts';
-import { roomsName, submittedEventsApp, clientType, submittedEventWeb } from '../../constants.js';
+import { roomsName, serverToAppEvents , clientType, submittedEventWeb } from '../../constants.js';
 import { webLogger as logger } from '../../services/logger.js';
 import { activeConnections } from '../state.js';
 import type {
@@ -33,9 +33,9 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 		const { durationSeconds, deviceAlias } = data;
 		const payload = { durationSeconds, deviceAlias };
 
-		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.ALARM, payload, (err, responses) => {
+		io.to(target_device_id).timeout(5000).emit(serverToAppEvents .ALARM_ACTIVATE, payload, (err, responses) => {
 			if (err) {
-				logger.error(`Error en ${submittedEventsApp.ALARM}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				logger.error(`Error en ${serverToAppEvents .ALARM_ACTIVATE}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
 				return;
 			}
@@ -43,7 +43,7 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 			callback({ status: response?.status || 'OK', message: response?.status || 'Alarma procesada.' });
 		});
 
-		logger.info(`Evento ${submittedEventsApp.ALARM} enviado a ${target_device_id} con payload: ${JSON.stringify(payload)}`);
+		logger.info(`Evento ${serverToAppEvents .ALARM_ACTIVATE} enviado a ${target_device_id} con payload: ${JSON.stringify(payload)}`);
 	} else {
 		logger.error(`Error en handleAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
@@ -59,9 +59,9 @@ export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback:
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.MESSAGE, dataMessage, (err, responses) => {
+		io.to(target_device_id).timeout(5000).emit(serverToAppEvents .MESSAGE_RECEIVE, dataMessage, (err, responses) => {
 			if (err) {
-				logger.error(`Error en ${submittedEventsApp.MESSAGE}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				logger.error(`Error en ${serverToAppEvents .MESSAGE_RECEIVE}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
 				return;
 			}
@@ -85,9 +85,9 @@ export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.PING, null, (err, responses) => {
+		io.to(target_device_id).timeout(5000).emit(serverToAppEvents .PING, null, (err, responses) => {
 			if (err) {
-				logger.error(`Error en ${submittedEventsApp.PING}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				logger.error(`Error en ${serverToAppEvents .PING}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
 				return;
 			}
@@ -95,7 +95,7 @@ export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback
 			callback({ status: 'OK', message: `Ping respondido: ${response?.status}` });
 		});
 
-		logger.info(`Evento ${submittedEventsApp.PING} enviado a: ${target_device_id}`);
+		logger.info(`Evento ${serverToAppEvents .PING} enviado a: ${target_device_id}`);
 	} else {
 		logger.error(`Error en handlePingAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
@@ -111,9 +111,9 @@ export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, cal
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).emit(submittedEventsApp.CHECK_FOR_UPDATE);
+		io.to(target_device_id).emit(serverToAppEvents .CHECK_FOR_UPDATE);
 
-		logger.info(`Evento ${submittedEventsApp.CHECK_FOR_UPDATE} enviado a: ${target_device_id}`);
+		logger.info(`Evento ${serverToAppEvents .CHECK_FOR_UPDATE} enviado a: ${target_device_id}`);
 		callback({ status: 'OK', message: 'Solicitud de búsqueda de actualización enviada.' });
 	} else {
 		logger.error(`Error en handleCheckForUpdate: Dispositivo ${target_device_id} no encontrado o desconectado.`);
@@ -131,9 +131,9 @@ export function handleGetDeviceInfo(io: AppIO, data: TargetedDevicePayload, call
 
 	if (activeConnections.has(target_device_id)) {
 		// El servidor pide la información y espera la respuesta en el callback (si la app lo soporta)
-		io.to(target_device_id).timeout(5000).emit(submittedEventsApp.GET_DEVICE_INFO, null, (err, responses) => {
+		io.to(target_device_id).timeout(5000).emit(serverToAppEvents .GET_DEVICE_INFO, null, (err, responses) => {
 			if (err) {
-				logger.error(`Error en ${submittedEventsApp.GET_DEVICE_INFO}: El dispositivo ${target_device_id} no respondió (timeout).`);
+				logger.error(`Error en ${serverToAppEvents .GET_DEVICE_INFO}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
 				return;
 			}
@@ -162,12 +162,12 @@ export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_APP).emit(submittedEventsApp.CHECK_FOR_UPDATE);
+		io.to(roomsName.ANDROID_APP).emit(serverToAppEvents .CHECK_FOR_UPDATE);
 
-		logger.info(`Evento ${submittedEventsApp.CHECK_FOR_UPDATE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`);
+		logger.info(`Evento ${serverToAppEvents .CHECK_FOR_UPDATE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`);
 		callback({ status: 'OK', message: `Solicitud de actualización enviada a ${androidClientsRoom.size} dispositivos.` });
 	} else {
-		logger.warn(`Se intentó enviar ${submittedEventsApp.CHECK_FOR_UPDATE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`);
+		logger.warn(`Se intentó enviar ${serverToAppEvents .CHECK_FOR_UPDATE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`);
 		callback({ status: 'WARN', message: 'No hay dispositivos Android conectados para recibir la solicitud.' });
 	}
 }
@@ -178,10 +178,10 @@ export function handleSendAllMessage(io: AppIO, payload: SendAllMessagePayload, 
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_APP).timeout(5000).emit(submittedEventsApp.MESSAGE, payload.dataMessage, (err, responses) => {
+		io.to(roomsName.ANDROID_APP).timeout(5000).emit(serverToAppEvents .MESSAGE_RECEIVE, payload.dataMessage, (err, responses) => {
 			if (err) {
 				// Este error se activa si NINGÚN cliente responde.
-				logger.error(`Error en ${submittedEventsApp.MESSAGE} a la sala: Ningún dispositivo respondió a tiempo.`);
+				logger.error(`Error en ${serverToAppEvents .MESSAGE_RECEIVE} a la sala: Ningún dispositivo respondió a tiempo.`);
 				callback({ status: 'ERROR', message: 'Ningún dispositivo respondió a tiempo.' });
 				return;
 			}
@@ -194,11 +194,11 @@ export function handleSendAllMessage(io: AppIO, payload: SendAllMessagePayload, 
 
 
 		logger.info(
-			`Evento ${submittedEventsApp.MESSAGE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`
+			`Evento ${serverToAppEvents .MESSAGE_RECEIVE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`
 		);
 	} else {
 		logger.warn(
-			`Se intentó enviar ${submittedEventsApp.MESSAGE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`
+			`Se intentó enviar ${serverToAppEvents .MESSAGE_RECEIVE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`
 		);
 		callback({ status: 'WARN', message: 'No hay dispositivos Android conectados para recibir la solicitud.' });
 	}

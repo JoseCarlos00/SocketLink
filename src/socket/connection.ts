@@ -1,6 +1,6 @@
 import type { AppIO, AppSocket } from '../types/socketInterface.d.ts';
 import { socketLogger } from '../services/logger.js';
-import { receivedEventsApp, receivedEventWeb } from '../constants.js';
+import { appToServerEvents , receivedEventWeb } from '../constants.js';
 import {
 	handleDeviceDisconnect,
 	handleDeviceRegistration,
@@ -21,7 +21,7 @@ import type { RegisterDevicePayload } from '../types/payloadsGetApp.d.ts'
 import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
 
 function registerDeviceEventHandlers(socket: AppSocket) {
-	socket.on(receivedEventsApp.REGISTER_DEVICE, (data: RegisterDevicePayload, ack) => {
+	socket.on(appToServerEvents .REGISTER_DEVICE, (data: RegisterDevicePayload, ack) => {
 		handleDeviceRegistration(socket, data, ack);
 	});
 }
@@ -44,7 +44,7 @@ function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
 
 	socket.on(receivedEventWeb.IDENTIFY_CLIENT, (payload) => handleWebClientIdentification(socket, payload));
 	
-	socket.on(receivedEventWeb.ALARM_ACTIVATION, (data, cb) => handleAlarm(io, data, cb));
+	socket.on(receivedEventWeb.ALARM_ACTIVATE, (data, cb) => handleAlarm(io, data, cb));
 	socket.on(receivedEventWeb.SEND_MESSAGE, (data, cb) => handleSendMessage(io, data, cb));
 	socket.on(receivedEventWeb.SEND_PING, (data, cb) => handlePingAlarm(io, data, cb));
 	socket.on(receivedEventWeb.GET_DEVICE_INFO, (data, cb) => handleGetDeviceInfo(io, data, cb));
@@ -55,12 +55,12 @@ function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
 	});
 
 
-	socket.on(receivedEventWeb.CHECK_FOR_ALL_UPDATE, (cb) => {
+	socket.on(receivedEventWeb.CHECK_FOR_UPDATE_BROADCAST, (cb) => {
 		if (verifyAdminRole(cb)) return;
 		handleCheckForAllUpdate(io, cb);
 	});
 
-	socket.on(receivedEventWeb.SEND_ALL_MESSAGE, (data, cb) => {
+	socket.on(receivedEventWeb.SEND_BROADCAST_MESSAGE, (data, cb) => {
 		if (verifyAdminRole(cb)) return;
 		handleSendAllMessage(io, data, cb);
 	});
