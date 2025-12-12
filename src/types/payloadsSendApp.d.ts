@@ -62,6 +62,7 @@ export type MaintenanceModeAck = (response: MaintenanceModeResponse) => void;
 
 export interface MaintenanceModePayload {
 	untilTimestampMs: number; // Timestamp cuando terminará el mantenimiento
+	untilDateReadable?: string; // Fecha en formato legible
 }
 
 export type GetDeviceInfoAck = (info: DeviceInfoResponse | null) => void;

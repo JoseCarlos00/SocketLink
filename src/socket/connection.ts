@@ -19,6 +19,7 @@ import {
 
 import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
 import { handleHeartbeatDevice } from './handlers/heartbeat.handler.js'
+import { handleSetMaintenanceMode } from './handlers/maintenance.handler.js'
 
 function registerDeviceEventHandlers(socket: AppSocket) {
 	socket.on(appToServerEvents.REGISTER_DEVICE, (data, ack) => {
@@ -67,6 +68,11 @@ function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
 	socket.on(receivedEventWeb.SEND_BROADCAST_MESSAGE, (data, cb) => {
 		if (verifyAdminRole(cb)) return;
 		handleSendAllMessage(io, data, cb);
+	});
+
+	socket.on(receivedEventWeb.SET_BROADCAST_MAINTENANCE_MODE, (data, cb) => {
+		if (verifyAdminRole(cb)) return;
+		handleSetMaintenanceMode(io, data, cb);
 	});
 }
 
