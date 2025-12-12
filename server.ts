@@ -9,7 +9,7 @@ import Logger from './src/services/logger.js';
 import swaggerSpec  from './src/swagger.js';
 import { config } from './src/config.js'; 
 import { loadAndSetCache, startSheetsPolling } from './src/socket/state.js';
-import { initializeDatabase } from './src/models/db.js'
+import { initializeDatabase } from './src/database/connection.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
 
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
