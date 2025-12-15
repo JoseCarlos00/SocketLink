@@ -14,16 +14,11 @@ function getEnvVar(key: string): string {
 }
 
 const allowedOrigins = [
-	'http://localhost:3000', // Tu Next.js de desarrollo
-	'http://localhost:3001', // Si Next.js sube en 3001
-	'http://192.168.15.189:3000', // Si pruebas en la red local
-	'http://192.168.15.189:3001', // Si pruebas en la red local
-	'http://192.168.1.7:3000', // Si pruebas en la red local
-	'http://192.168.15.190:3000', // Si pruebas en la red local
-	'http://192.168.15.190:9000', // Si pruebas en la red local
-	'http://192.168.15.189:3001', // Si pruebas en la red local
-	'https://app.tusitioproduccion.com', // Tu dominio de producción
-]; // Puedes agregar más orígenes aquí
+	'http://localhost:3100',
+	'http://192.168.15.189:3100',
+	'http://192.168.1.7:3100',
+	'http://192.168.15.190:3100',
+];
 
 export const config = {
 	JWT_SECRET: getEnvVar('JWT_SECRET'),

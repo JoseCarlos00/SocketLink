@@ -31,7 +31,16 @@ export const receivedEventWeb = {
 
 export const submittedEventWeb = {
 	INVENTORY_UPDATE_ALERT: 'INVENTORY_UPDATE_ALERT',
-	DEVICE_HEARTBEAT: 'DEVICE_HEARTBEAT',
+
+	// Eventos de datos modificados (para hacer fetch)
+	DATA_MODIFIED: 'data:modified',
+
+	DEVICE_HEARTBEAT: 'DEVICE_HEARTBEAT',	
+
+	DEVICE_CONNECTED: 'device:connected', // Nuevo dispositivo conectado
+	DEVICE_DISCONNECTED: 'device:disconnected', // Dispositivo desconectado
+	DEVICE_RECONNECTED: 'device:reconnected', // Dispositivo volvió online
+	DEVICE_BATTERY_UPDATE: 'device:battery:update', // Cambio de batería >= 5%
 } as const;
 
 
