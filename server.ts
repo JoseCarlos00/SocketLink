@@ -11,6 +11,7 @@ import { config } from './src/config.js';
 import { loadAndSetCache, startSheetsPolling } from './src/socket/state.js';
 import { initializeDatabase } from './src/database/connection.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
+import { deviceStatusManager } from './src/managers/DeviceStatusManager.js';
 
 import type { ClientToServerEvents, ServerToClientEvents } from './src/types/serverEvents.js';
 
@@ -85,6 +86,7 @@ const app = configureApp();
 const server = http.createServer(app);
 
 const io = configureSocketIO(server);
+deviceStatusManager.setIO(io);
 
 // Aplicar middleware de autenticación a todas las conexiones de Socket.IO
 io.use(socketAuthMiddleware);
