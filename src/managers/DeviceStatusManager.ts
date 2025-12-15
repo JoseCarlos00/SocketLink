@@ -2,6 +2,8 @@
 import type { Server } from 'socket.io';
 import { roomsName, submittedEventWeb } from '../constants.js';
 import { socketLogger } from '../services/logger.js';
+import type { Devices } from '../types/inventory.d.ts';
+
 
 interface DeviceStatus {
 	deviceId: string;
@@ -13,10 +15,28 @@ interface DeviceStatus {
 
 export class DeviceStatusManager {
 	private devices: Map<string, DeviceStatus> = new Map();
+	private devicesMappingCache = new Map<string, Devices>();
 	private io: Server | null = null;
 
 	setIO(io: Server) {
 		this.io = io;
+	}
+
+	public setDeviceMapping(ip: string, device: Devices): void {
+		this.devicesMappingCache.set(ip, device);
+	}
+
+	public getDeviceByIp(ip: string): Devices | undefined {
+		return this.devicesMappingCache.get(ip);
+	}
+
+	public getSizeDevicesMappingCache(): number {
+		return this.devicesMappingCache.size;
+	}
+
+
+	public getAllDevices(): Devices[] {
+		return Array.from(this.devicesMappingCache.values());
 	}
 
 	updateFromHeartbeat(deviceId: string, battery: number, charging: boolean) {
@@ -52,6 +72,20 @@ export class DeviceStatusManager {
 		if (device && device.online) {
 			device.online = false;
 			this.emitToWeb('device:disconnected', { deviceId, lastSeen: device.lastSeen, timestamp: Date.now() });
+		}
+	}
+
+	markAsOnline(deviceId: string) {
+		const device = this.devices.get(deviceId);
+
+		if (device && !device.online) {
+			device.online = true;
+			this.emitToWeb('device:reconnected', {
+				deviceId,
+				battery: device.battery,
+				charging: device.charging,
+				timestamp: Date.now(),
+			});
 		}
 	}
 

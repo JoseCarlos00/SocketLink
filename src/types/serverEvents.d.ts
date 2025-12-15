@@ -40,7 +40,7 @@ export interface ServerToClientEvents {
 	[serverToAppEvents.SET_MAINTENANCE_MODE]: (payload: MaintenanceModePayload, ack: MaintenanceModeAck) => void;
 
 	// Web
-	[submittedEventWeb.INVENTORY_UPDATE_ALERT]: (payload?: { message: string }) => void;
+	[submittedEventWeb.DATA_MODIFIED]: (payload?: { message: string }) => void;
 
 	[submittedEventWeb.DEVICE_HEARTBEAT]: (payload: HeartbeatPayload) => void;
 }

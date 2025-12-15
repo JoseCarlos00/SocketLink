@@ -5,7 +5,7 @@ export interface Inventory {
 	conectado: boolean;
 }
 
-export interface MappingData {
+export interface Devices {
 	index: string;
 	androidId: string;
 	equipo: string;

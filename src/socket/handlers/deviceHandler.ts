@@ -1,20 +1,21 @@
 import type { AppSocket } from '../../types/socketInterface.d.ts';
 import { roomsName } from '../../constants.js';
-import { activeConnections, fixedMappingCache } from '../state.js';
+import { activeConnections } from '../state.js';
 import type { RegisterDevicePayload, RegisterDeviceAck } from '../../types/payloadsGetApp.d.ts';
 import { updateAndroidIdInSheets } from '../../services/googleSheetService.js'; // Mantenemos la importación de la función
 import { androidLogger as logger } from '../../services/logger.js'; // Usamos un solo logger para este módulo
-import { metricsManager } from '../../managers/metricsManager.js';
+import { deviceStatusManager } from '../../managers/DeviceStatusManager.js'
 
 export async function handleDeviceRegistration(socket: AppSocket, data: RegisterDevicePayload, ack: RegisterDeviceAck) {
 	const { androidId, ipAddress } = data; // androidId es el DEVICE_ID que envía el móvil
+	let newRegister = false;
 
 	if (!androidId || !ipAddress) {
 		ack?.({ status: 'ERROR', reason: 'Datos de identificación incompletos.' });
 		return;
 	}
 
-	const deviceData = fixedMappingCache.get(ipAddress);
+	const deviceData = deviceStatusManager.getDeviceByIp(ipAddress);
 
 	if (!deviceData) {
 		// Dispositivo Desconocido: No existe en la hoja de cálculo
@@ -60,6 +61,7 @@ export function handleDeviceDisconnect(socket: AppSocket) {
 
 	if (deviceId) {
 		logger.info(`[DESCONEXIÓN] Dispositivo desconectado: ${deviceId}`);
+		deviceStatusManager.markAsDisconnected(deviceId);
 		activeConnections.delete(deviceId);
 		socket.leave(deviceId);
 		socket.leave(roomsName.ANDROID_APP);

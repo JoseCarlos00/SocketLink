@@ -8,7 +8,7 @@ import {
 	IP_COLUMN,
 	ANDROID_ID_COLUMN,
 } from '../constants.js';
-import type { MappingData } from '../types/inventory.d.ts';
+import type { Devices } from '../types/inventory.d.ts';
 
 const sheetsAuth = new google.auth.JWT(SERVICE_ACCOUNT.client_email, undefined, SERVICE_ACCOUNT.private_key, [
 	'https://www.googleapis.com/auth/spreadsheets',
@@ -16,7 +16,7 @@ const sheetsAuth = new google.auth.JWT(SERVICE_ACCOUNT.client_email, undefined, 
 
 const sheets = google.sheets({ version: 'v4', auth: sheetsAuth });
 
-export async function fetchInventoryFromGoogleSheet(): Promise<MappingData[][]> {
+export async function fetchInventoryFromGoogleSheet(): Promise<Devices[][]> {
 	const result = await sheets.spreadsheets.values.get({
 		spreadsheetId: SPREAD_SHEET_ID,
 		range: CRITICAL_MAPPING_RANGE,

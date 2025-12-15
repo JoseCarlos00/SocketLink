@@ -1,5 +1,6 @@
-import { activeConnections, fixedMappingCache } from '../socket/state.js';
+import { activeConnections } from '../socket/state.js';
 import { inventoryLogger as logger } from '../services/logger.js';
+import { deviceStatusManager } from '../managers/DeviceStatusManager.js'
 
 /**
  * Obtiene la lista de todos los dispositivos registrados desde la caché.
@@ -7,8 +8,11 @@ import { inventoryLogger as logger } from '../services/logger.js';
  */
 export function getRegisteredDevicesList(req: any, res: any) {
 	try {
+
+		const devices = deviceStatusManager.getAllDevices();
+
 		// Transforma el Map a un array de objetos para la respuesta JSON.
-		const devicesList = Array.from(fixedMappingCache.values()).map((device) => ({
+		const devicesList = devices.map((device) => ({
 			id: device.androidId ?? `index-${device.index}`,
 			androidId: device.androidId,
 			equipo: device.equipo,
@@ -16,9 +20,9 @@ export function getRegisteredDevicesList(req: any, res: any) {
 			usuario: device.usuario,
 			correo: device.correo,
 			aliasUsuario: device.aliasUsuario,
-			ip: device.ip,
+			ipAddress: device.ip,
 			macAddress: device.macAddress,
-			isConnected: activeConnections.has(device.androidId), // Muestra el estado en tiempo real
+			online: device.androidId ? activeConnections.has(device.androidId) : false,
 		}));
 
 		logger.info(`Se ha solicitado la lista de inventario. Total de dispositivos en caché: ${devicesList.length}`);
