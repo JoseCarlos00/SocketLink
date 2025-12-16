@@ -47,7 +47,7 @@ export const login = async (req: Request, res: Response) => {
 
 		res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
 			httpOnly: true,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: 'lax',
 			secure: isProduction,
 			maxAge: timeExpireRefreshToken
 		});
@@ -55,14 +55,14 @@ export const login = async (req: Request, res: Response) => {
 		// Cookie para el Access Token (accesible por el servidor de Next.js)
 		res.cookie(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
 			httpOnly: true,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: 'lax',
 			secure: isProduction,
 			maxAge: timeExpireAccessToken,
 		});
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
 		logger.info(`Inicio de sesión exitoso para el usuario: ${username}`);
-		res.json({ message: 'Inicio de sesión exitoso' });
+		res.json({ user: payload , message: 'Inicio de sesión exitoso' });
 	} catch (error) {
 		logger.error(`Error en el proceso de login para ${username}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
@@ -123,14 +123,14 @@ export const logout = (_req: Request, res: Response) => {
 		// Limpiar la cookie del refresh token
 		res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
 			httpOnly: true,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: 'lax',
 			secure: isProduction,
 		});
 
 		// Limpiar la cookie del access token
 		res.clearCookie(ACCESS_TOKEN_COOKIE_NAME, {
 			httpOnly: true,
-			sameSite: isProduction ? 'none' : 'lax',
+			sameSite: 'lax',
 			secure: isProduction,
 		});
 

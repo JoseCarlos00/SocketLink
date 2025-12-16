@@ -14,10 +14,9 @@ function getEnvVar(key: string): string {
 }
 
 const allowedOrigins = [
-	'http://localhost:3100',
-	'http://192.168.15.189:3100',
-	'http://192.168.1.7:3100',
-	'http://192.168.15.190:3100',
+	'http://localhost:5173',
+	'http://192.168.15.189:5173',
+	'http://192.168.1.5:5173',
 ];
 
 export const config = {

@@ -26,8 +26,6 @@ import usersApiRoutes from './src/api/users.route.js';
 import inventoryApiRoutes from './src/api/inventory.route.js';
 import reportsRoutes from './src/api/reports.route.js';
 
-import { getProfile } from './src/controllers/auth.controller.js'
-
 // 1. Inicializar la base de datos
 initializeDatabase();
 
@@ -104,7 +102,6 @@ app.use('/status', ((_, res) => {
 	res.status(200).json({ status: 'ACTIVE' });
 }))
 app.use('/api/auth', authApiRoutes);
-app.use('/api/users/me', verifyToken, getProfile); // Asumiendo que getProfile está en auth.controller
 app.use('/api/inventory', verifyToken, inventoryApiRoutes);
 app.use('/api/reports',verifyToken, checkSuperAdminRole, reportsRoutes);
 app.use('/api/admin/users', verifyToken, usersApiRoutes);
