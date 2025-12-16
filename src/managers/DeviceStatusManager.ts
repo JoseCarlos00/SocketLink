@@ -185,12 +185,18 @@ export class DeviceStatusManager {
 	emitDataModified(reason?: string) {
 		if (!this.io) return;
 
+		const webCLientRoom = this.io.sockets.adapter.rooms.get(roomsName.WEB_CLIENT);
+		if (!webCLientRoom || webCLientRoom.size === 0) {
+			socketLogger.warn('No hay clientes web conectados. No se emitirá el evento.')
+			return;
+		}
+
 		this.io.to(roomsName.WEB_CLIENT).emit(submittedEventWeb.DATA_MODIFIED, {
 			timestamp: Date.now(),
 			reason: reason || 'Device data modified',
 		});
 
-		socketLogger.info(`[DeviceStatus] Emitido: data:modified - ${reason || 'unknown'}`);
+		socketLogger.info(`[DeviceStatus] Emitido: data:modified a ${webCLientRoom.size} clientes web.`);
 	}
 
 	// ============ UTILIDADES ============

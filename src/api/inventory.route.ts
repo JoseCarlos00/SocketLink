@@ -34,7 +34,7 @@ router.get('/devices', (req, res) => {
       lastSeen: device.lastSeen,
       timeSinceLastSeen: device.timeSinceLastSeen,
     }));
-
+    
     res.json({
       success: true,
       data: devicesList,
