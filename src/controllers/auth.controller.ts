@@ -156,7 +156,7 @@ export const getProfile = async (req: Request, res: Response) => {
 		if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
 
 		// Devolvemos solo los datos seguros y necesarios para el frontend.
-		res.json({ id: user.id, username: user.username, role: user.role });
+		res.json({ user: { id: user.id, username: user.username, role: user.role } });
 	} catch (error) {
 		logger.error(`Error al obtener el perfil del usuario ${userId}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });

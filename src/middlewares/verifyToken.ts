@@ -6,10 +6,7 @@ import Logger from '../services/logger.js'
 import { ACCESS_TOKEN_COOKIE_NAME } from '../constants.js'
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
-	const token = req.cookies[ACCESS_TOKEN_COOKIE_NAME]; // Usa tu constante
-
-	console.log('🍪 Cookies:', req.cookies);
-	console.log('🔑 Access Token:', token);
+	const token = req.cookies[ACCESS_TOKEN_COOKIE_NAME];
 
 	if (!token) return res.status(401).json({ message: 'Token JWT inválido o ausente.' });
 
