@@ -3,10 +3,13 @@ import { verifyAccessToken } from '../utils/token.js';
 import { User } from '../models/user.model.js';
 import type { User as UserType } from "../types/user.d.ts";
 import Logger from '../services/logger.js'
+import { ACCESS_TOKEN_COOKIE_NAME } from '../constants.js'
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
-	const authHeader = req.header('Authorization');
-	const token = authHeader?.split(' ')[1];
+	const token = req.cookies[ACCESS_TOKEN_COOKIE_NAME]; // Usa tu constante
+
+	console.log('🍪 Cookies:', req.cookies);
+	console.log('🔑 Access Token:', token);
 
 	if (!token) return res.status(401).json({ message: 'Token JWT inválido o ausente.' });
 
@@ -18,7 +21,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 			return res.status(401).json({ message: 'La estructura del token no es válida.' });
 		}
 
-		const getUser = await User.findById(payload.id) as UserType | undefined;
+		const getUser = User.findById(payload.id) as UserType | undefined;
 
 		if (!getUser) {
 			return res.status(401).json({ message: 'Usuario no encontrado' });

@@ -35,6 +35,7 @@ export async function handleDeviceRegistration(socket: AppSocket, data: Register
 		try {
 			// **ACTUALIZACIÓN EN SHEETS (Persistencia)**
 			await updateAndroidIdInSheets(deviceData.index, ipAddress, androidId);
+			newRegister = true;
 		} catch (error) {
 			logger.error(
 				`[REGISTRO]: Error al intentar actualizar el androidId en Google Sheets para la IP ${ipAddress}. Error: ${error}`
@@ -42,6 +43,9 @@ export async function handleDeviceRegistration(socket: AppSocket, data: Register
 			ack?.({ status: 'ERROR', reason: `Error al actualizar Google Sheets para la IP ${ipAddress}.` });
 			return;
 		}
+
+		
+		if (!newRegister) deviceStatusManager.markAsOnline(androidId);
 
 		deviceData.androidId = androidId;
 	}

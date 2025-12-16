@@ -40,6 +40,8 @@ export async function loadAndSetCache() {
 			}
 		});
 
+		deviceStatusManager.initializeDevicesFromCache();
+
 
 		// Después de cargar los datos, obtenemos el timestamp para evitar una recarga inmediata.
 		lastKnownTimestamp = await getMetadataTimestamp(SPREAD_SHEET_ID);
