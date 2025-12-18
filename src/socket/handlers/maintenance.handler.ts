@@ -33,7 +33,7 @@ export function handleSetMaintenanceMode(io: AppIO, data: MaintenanceModePayload
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
 		io.to(roomsName.ANDROID_APP)
-			.timeout(5000)
+			.timeout(15000)
 			.emit(serverToAppEvents.SET_MAINTENANCE_MODE, { untilTimestampMs }, (err, responses) => {
 				if (err) {
 					logger.error(`Error en ${serverToAppEvents.SET_MAINTENANCE_MODE}: Ningún dispositivo respondió a tiempo.`);

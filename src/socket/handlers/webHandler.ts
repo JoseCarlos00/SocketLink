@@ -38,7 +38,7 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 		const payload = { durationSeconds, deviceAlias };
 
 		io.to(target_device_id)
-			.timeout(5000)
+			.timeout(15000)
 			.emit(serverToAppEvents.ALARM_ACTIVATE, payload, (err, responses) => {
 				if (err) {
 					logger.error(
@@ -69,7 +69,7 @@ export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback:
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).timeout(5000).emit(serverToAppEvents.MESSAGE_RECEIVE, dataMessage, (err, responses) => {
+		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.MESSAGE_RECEIVE, dataMessage, (err, responses) => {
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.MESSAGE_RECEIVE}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
@@ -95,7 +95,7 @@ export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).timeout(5000).emit(serverToAppEvents.PING, null, (err, responses) => {
+		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.PING, null, (err, responses) => {
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.PING}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
@@ -121,7 +121,7 @@ export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, cal
 	}
 
 	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).timeout(5000).emit(serverToAppEvents.CHECK_FOR_UPDATE, null, (err, responses) => {
+		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.CHECK_FOR_UPDATE, null, (err, responses) => {
 			logger.info(`Evento ${serverToAppEvents.CHECK_FOR_UPDATE} enviado a: ${target_device_id}`);
 
 			if (err) {
@@ -151,7 +151,7 @@ export function handleGetDeviceInfo(io: AppIO, data: TargetedDevicePayload, call
 
 	if (activeConnections.has(target_device_id)) {
 		// El servidor pide la información y espera la respuesta en el callback (si la app lo soporta)
-		io.to(target_device_id).timeout(5000).emit(serverToAppEvents.GET_DEVICE_INFO, null, (err, responses) => {
+		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.GET_DEVICE_INFO, null, (err, responses) => {
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.GET_DEVICE_INFO}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
@@ -182,7 +182,7 @@ export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_APP).timeout(5000).emit(serverToAppEvents.CHECK_FOR_UPDATE, null, (err, responses) => {
+		io.to(roomsName.ANDROID_APP).timeout(15000).emit(serverToAppEvents.CHECK_FOR_UPDATE, null, (err, responses) => {
 			if (err) {
 				// Este error se activa si NINGÚN cliente responde.
 				logger.error(`Error en ${serverToAppEvents.CHECK_FOR_UPDATE} a la sala: Ningún dispositivo respondió a tiempo.`);
@@ -206,7 +206,7 @@ export function handleSendAllMessage(io: AppIO, payload: SendAllMessagePayload, 
 
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
-		io.to(roomsName.ANDROID_APP).timeout(5000).emit(serverToAppEvents.MESSAGE_RECEIVE, payload.dataMessage, (err, responses) => {
+		io.to(roomsName.ANDROID_APP).timeout(15000).emit(serverToAppEvents.MESSAGE_RECEIVE, payload.dataMessage, (err, responses) => {
 			if (err) {
 				// Este error se activa si NINGÚN cliente responde.
 				logger.error(`Error en ${serverToAppEvents.MESSAGE_RECEIVE} a la sala: Ningún dispositivo respondió a tiempo.`);
