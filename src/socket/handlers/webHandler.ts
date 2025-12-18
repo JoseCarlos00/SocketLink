@@ -26,7 +26,7 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 
 	if (!target_device_id) {
 		logger.error('Error en handleAlarm: target_device_id no fue proporcionado.');
-		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
+		return callback({ status: 'ERROR', message: 'Alarm respondido: Falta el ID del dispositivo de destino.' });
 	}
 
 	// Registrar alarma en métricas
@@ -44,11 +44,13 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 					logger.error(
 						`Error en ${serverToAppEvents.ALARM_ACTIVATE}: El dispositivo ${target_device_id} no respondió (timeout).`
 					);
-					callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+					callback({ status: 'ERROR', message: 'Alarm respondido: El dispositivo no respondió a tiempo.' });
 					return;
 				}
 				const response = responses[0]; // La respuesta real está en un array
-				callback({ status: response?.status || 'OK', message: response?.status || 'Alarma procesada.' });
+				console.log(response);
+				
+				callback({ status: response?.status || 'OK', message: 'Alarm respondido: Alarma enviada.' });
 			});
 
 		logger.info(
@@ -56,7 +58,7 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 		);
 	} else {
 		logger.error(`Error en handleAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
-		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
+		callback({ status: 'ERROR', message: `Alarm respondido: Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
@@ -65,24 +67,25 @@ export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback:
 
 	if (!target_device_id) {
 		logger.error('Error en handleSendMessage: target_device_id no fue proporcionado.');
-		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
+		return callback({ status: 'ERROR', message: 'Message respondido: Falta el ID del dispositivo de destino.' });
 	}
 
 	if (activeConnections.has(target_device_id)) {
 		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.MESSAGE_RECEIVE, dataMessage, (err, responses) => {
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.MESSAGE_RECEIVE}: El dispositivo ${target_device_id} no respondió (timeout).`);
-				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+				callback({ status: 'ERROR', message: 'Message respondido: El dispositivo no respondió a tiempo.' });
 				return;
 			}
+
 			const response = responses[0];
-			callback({ status: response?.status || 'OK', message: response?.status || 'Mensaje procesado.' });
+			callback({ status: response?.status || 'OK', message: 'Message respondido: Mensaje enviado.' });
 		});
 
 		logger.info(`Evento MESSAGE enviado a: ${target_device_id}`);
 	} else {
 		logger.error(`Error en handleSendMessage: Dispositivo ${target_device_id} no encontrado o desconectado.`);
-		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
+		callback({ status: 'ERROR', message: `Message respondido: Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
@@ -91,14 +94,14 @@ export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback
 
 	if (!target_device_id) {
 		logger.error('Error en handlePingAlarm: target_device_id no fue proporcionado.');
-		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
+		return callback({ status: 'ERROR', message: 'Ping respondido: Falta el ID del dispositivo de destino.' });
 	}
 
 	if (activeConnections.has(target_device_id)) {
 		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.PING, null, (err, responses) => {
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.PING}: El dispositivo ${target_device_id} no respondió (timeout).`);
-				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+				callback({ status: 'ERROR', message: 'Ping respondido: El dispositivo no respondió a tiempo.' });
 				return;
 			}
 			const response = responses[0];
@@ -108,7 +111,7 @@ export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback
 		logger.info(`Evento ${serverToAppEvents.PING} enviado a: ${target_device_id}`);
 	} else {
 		logger.error(`Error en handlePingAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
-		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
+		callback({ status: 'ERROR', message: `Ping respondido: Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
@@ -117,7 +120,7 @@ export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, cal
 
 	if (!target_device_id) {
 		logger.error('Error en handleCheckForUpdate: target_device_id no fue proporcionado.');
-		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
+		return callback({ status: 'ERROR', message: 'Check update respondido: Falta el ID del dispositivo de destino.' });
 	}
 
 	if (activeConnections.has(target_device_id)) {
@@ -126,18 +129,18 @@ export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, cal
 
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.CHECK_FOR_UPDATE}: del dispositivo ${target_device_id} no respondió (timeout).`);
-				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+				callback({ status: 'ERROR', message: 'Check update respondido: El dispositivo no respondió a tiempo.' });
 				return;
 			}
 
 			const response = responses[0];
 			console.log(response, responses);
 			
-			callback({ status: 'OK', message: 'Solicitud de búsqueda de actualización enviada.',});
+			callback({ status: 'OK', message: 'Check update respondido: Solicitud de búsqueda de actualización enviada.' });
 		})
 	} else {
 		logger.error(`Error en handleCheckForUpdate: Dispositivo ${target_device_id} no encontrado o desconectado.`);
-		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
+		callback({ status: 'ERROR', message: `Check update respondido: Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
@@ -146,7 +149,7 @@ export function handleGetDeviceInfo(io: AppIO, data: TargetedDevicePayload, call
 
 	if (!target_device_id) {
 		logger.error('Error en handleGetDeviceInfo: target_device_id no fue proporcionado.');
-		return callback({ status: 'ERROR', message: 'Falta el ID del dispositivo de destino.' });
+		return callback({ status: 'ERROR', message: 'Get device info respondido: Falta el ID del dispositivo de destino.' });
 	}
 
 	if (activeConnections.has(target_device_id)) {
@@ -154,23 +157,29 @@ export function handleGetDeviceInfo(io: AppIO, data: TargetedDevicePayload, call
 		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.GET_DEVICE_INFO, null, (err, responses) => {
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.GET_DEVICE_INFO}: El dispositivo ${target_device_id} no respondió (timeout).`);
-				callback({ status: 'ERROR', message: 'El dispositivo no respondió a tiempo.' });
+				callback({ status: 'ERROR', message: 'Get device info respondido: El dispositivo no respondió a tiempo.' });
 				return;
 			}
 
 			const deviceInfo = responses[0]; // responses es un array, tomamos el primer elemento.
+			console.log(deviceInfo);
+			
 			if (deviceInfo?.androidId) {
-				callback({ status: 'OK', message: 'Información del dispositivo obtenida.', data: deviceInfo });
+				callback({
+					status: 'OK',
+					message: 'Get device info respondido: Información del dispositivo obtenida.',
+					data: deviceInfo,
+				});
 			} else {
 				callback({
 					status: 'ERROR',
-					message: 'El dispositivo no respondió o la respuesta no fue válida.',
+					message: 'Get device info respondido: El dispositivo no respondió o la respuesta no fue válida.',
 				});
 			}
 		});
 	} else {
 		logger.error(`Error en handleGetDeviceInfo: Dispositivo ${target_device_id} no encontrado o desconectado.`);
-		callback({ status: 'ERROR', message: `Dispositivo ${target_device_id} desconectado.` });
+		callback({ status: 'ERROR', message: `Get device info respondido: Dispositivo ${target_device_id} desconectado.` });
 	}
 }
 
