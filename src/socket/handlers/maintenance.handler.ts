@@ -56,7 +56,7 @@ export function handleSetMaintenanceMode(io: AppIO, data: MaintenanceModePayload
 		logger.info(`[Maintenance] Modo mantenimiento activado hasta ${new Date(untilTimestampMs)}`);
 	} else {
 		logger.warn(
-			`Se intentó enviar ${serverToAppEvents.CHECK_FOR_UPDATE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`
+			`Se intentó enviar ${serverToAppEvents.SET_MAINTENANCE_MODE} a la sala '${roomsName.ANDROID_APP}', pero no hay dispositivos conectados.`
 		);
 		callback({ status: 'WARN', message: 'No hay dispositivos Android conectados para recibir la solicitud.' });
 	}  
