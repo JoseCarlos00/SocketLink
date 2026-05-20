@@ -1,6 +1,7 @@
-export const appToServerEvents  = {
+export const appToServerEvents = {
 	REGISTER_DEVICE: 'REGISTER_DEVICE',
 	HEARTBEAT: 'HEARTBEAT',
+	PING: 'PING',
 } as const;
 
 // Eventos que el servidor/web EMITE y la app Android escucha
