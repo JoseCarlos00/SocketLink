@@ -49,12 +49,13 @@ export async function handleDeviceRegistration(socket: AppSocket, data: Register
 
 	// Establecer Conexión en Memoria (Caché B)
 	socket.data.deviceId = androidId;
+	socket.data.equipo = deviceData.equipo;
 	socket.join(androidId); // La room de destino
 	socket.join(roomsName.ANDROID_APP);
 	activeConnections.set(androidId, socket.id); // Registra en Caché B
 	deviceStatusManager.markAsOnline(androidId);
 	logger.info(`[REGISTRO] Dispositivo registrado. IP: ${ipAddress}, ID: ${androidId}`);
-	ack?.({ status: 'OK' });
+	ack?.({ status: 'OK', equipo: deviceData.equipo});
 }
 
 export function handleDeviceDisconnect(socket: AppSocket) {

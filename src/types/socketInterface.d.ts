@@ -8,6 +8,10 @@ type SafeUser = Pick<User, 'id' | 'username' | 'role'>;
 export interface AppSocket extends Socket<ClientToServerEvents, ServerToClientEvents> {
 	// La propiedad currentUser es opcional porque no todos los sockets (ej. los de los dispositivos) estarán autenticados.
 	currentUser?: SafeUser;
+	data: {
+		deviceId?: string;
+		equipo?: string;
+	};
 }
 
 export type AppIO = Server<ClientToServerEvents, ServerToClientEvents>;

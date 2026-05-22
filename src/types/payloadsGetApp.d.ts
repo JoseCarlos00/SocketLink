@@ -6,5 +6,9 @@ export interface RegisterDevicePayload {
 }
 
 export interface RegisterDeviceAck {
-	(response: { status: 'OK' | 'ERROR'; reason?: string } | null): void;
+    (response: 
+        | { status: 'OK'; equipo: string }
+        | { status: 'ERROR'; reason: string }
+        | null
+    ): void;
 }
