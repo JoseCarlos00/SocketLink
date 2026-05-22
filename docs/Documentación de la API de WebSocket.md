@@ -289,28 +289,3 @@ Esta respuesta se mostrara en la UI de la app
     ack.({ status: 'OK' })
   });
 ```
-
-### `HEARTBEAT`
-
-- **Evento**: `HEARTBEAT`
-- **Descripción**: Los dispositivos Android envían periódicamente (cada 45s) su estado de salud al servidor.
-
-- **Payload**:
-
-```typescript
-  {
-    deviceId: string,
-    battery: number,      // 0-100
-    charging: boolean,
-    timestamp: number
-  }
-```
-
-- **Callback ACK** (opcional):
-
-```javascript
-  { 
-    "status": "OK", 
-    "serverTime": 1705123456789 
-  }
-```

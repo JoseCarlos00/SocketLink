@@ -7,7 +7,6 @@ export interface AlarmPayload {
 // Status
 type ResponseSts = 'OK' | 'ERROR';
 
-
 // Respuesta:
 export interface AlarmResponse {
 	status: ResponseSts;
@@ -40,7 +39,7 @@ export interface MessageResponse {
 export type MessageAck = (response: MessageResponse | null) => void;
 
 // ===== CHECK_FOR_UPDATE =====
-export type CheckForUpdateAck = (response: ResponseSts | null) => void;
+export type CheckForUpdateAck = (response: { status: ResponseSts } | null) => void;
 
 // ===== GET_DEVICE_INFO =====
 export interface DeviceInfoResponse {
@@ -48,7 +47,6 @@ export interface DeviceInfoResponse {
 	ipAddress: string;
 	appVersion: string;
 }
-
 
 // MAINTENANCE MODE
 

@@ -1,6 +1,6 @@
 import type { appToServerEvents, serverToAppEvents, receivedEventWeb, submittedEventWeb } from '../constants.ts';
 import type { Inventory } from './inventory.js';
-import type { RegisterDevicePayload, RegisterDeviceAck, HeartbeatPayload, HeartbeatAck } from './payloadsGetApp.d.ts';
+import type { RegisterDevicePayload, RegisterDeviceAck } from './payloadsGetApp.d.ts';
 
 import type {
 	AlarmActivationPayload,
@@ -41,15 +41,11 @@ export interface ServerToClientEvents {
 
 	// Web
 	[submittedEventWeb.DATA_MODIFIED]: (payload?: { message: string }) => void;
-
-	[submittedEventWeb.DEVICE_HEARTBEAT]: (payload: HeartbeatPayload) => void;
 }
 
 export interface ClientToServerEvents {
 	// Android
 	[appToServerEvents.REGISTER_DEVICE]: (payload: RegisterDevicePayload, ack: RegisterDeviceAck) => void;
-
-	[appToServerEvents.HEARTBEAT]: (payload: HeartbeatPayload, ack: HeartbeatAck) => void;
 
 	// Web
 	[receivedEventWeb.IDENTIFY_CLIENT]: (payload: IdentifyClientPayload) => void;

@@ -268,28 +268,3 @@ Estos son los eventos que el servidor emitirá y que el cliente web debe escucha
     .catch(error => console.error("Error al obtener el inventario:", error));
   }
 ```
-
-### `DEVICE_HEARTBEAT`
-
-- **Evento**: `DEVICE_HEARTBEAT`
-
-- **Descripción**: Los dispositivos Android envían periódicamente (cada 45s) su estado de salud al servidor.
-
-- **Payload**: Ninguno.
-
-- **Callback**: `(response: CallbackResponse) => void`
-
-  - `status: 'OK'` si el dispositivo respondió con su información. Los datos estarán en el campo `data` de la respuesta.
-
-    -
-
-      ```typescript
-        {
-          deviceId: string,
-          battery: number, // 0-100
-          charging: boolean,
-          timestamp: number
-        }
-        ```
-
-  - `status: 'ERROR'` si el dispositivo no respondió o la respuesta no fue válida.

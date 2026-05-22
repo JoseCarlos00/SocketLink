@@ -112,7 +112,6 @@ etc.
 
 - `UPDATE_STATUS`
 - `ALARM`
-- `HEARTBEAT`
 - otros eventos móviles
 
 * * *

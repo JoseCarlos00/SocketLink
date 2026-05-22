@@ -18,17 +18,12 @@ import {
 } from './handlers/webHandler.js';
 
 import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
-import { handleHeartbeatDevice } from './handlers/heartbeat.handler.js'
 import { handleSetMaintenanceMode } from './handlers/maintenance.handler.js'
 
 function registerDeviceEventHandlers(socket: AppSocket) {
 	socket.on(appToServerEvents.REGISTER_DEVICE, (data, ack) => {
 		handleDeviceRegistration(socket, data, ack);
 	});
-
-	socket.on(appToServerEvents.HEARTBEAT, (data, ask)=> {
-		handleHeartbeatDevice(socket, data, ask)
-	})
 }
 
 function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {

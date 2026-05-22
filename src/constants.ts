@@ -1,6 +1,5 @@
 export const appToServerEvents = {
 	REGISTER_DEVICE: 'REGISTER_DEVICE',
-	HEARTBEAT: 'HEARTBEAT',
 	PING: 'PING',
 } as const;
 
@@ -35,8 +34,6 @@ export const submittedEventWeb = {
 
 	// Eventos de datos modificados (para hacer fetch)
 	DATA_MODIFIED: 'data:modified',
-
-	DEVICE_HEARTBEAT: 'DEVICE_HEARTBEAT',	
 
 	DEVICE_CONNECTED: 'device:connected', // Nuevo dispositivo conectado
 	DEVICE_DISCONNECTED: 'device:disconnected', // Dispositivo desconectado

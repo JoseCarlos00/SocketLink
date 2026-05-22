@@ -62,48 +62,6 @@ export function initializeDatabase() {
     `
 		).run();
 
-		// Tabla de alertas de batería
-		db.prepare(
-			`
-      CREATE TABLE IF NOT EXISTS battery_alerts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        device_id TEXT NOT NULL,
-        battery_level INTEGER NOT NULL,
-        charging INTEGER NOT NULL DEFAULT 0,
-        timestamp INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-		).run();
-
-		// Tabla de eventos offline
-		db.prepare(
-			`
-      CREATE TABLE IF NOT EXISTS offline_events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        device_id TEXT NOT NULL,
-        start_time INTEGER NOT NULL,
-        end_time INTEGER,
-        duration_minutes INTEGER,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-		).run();
-
-		// Tabla de heartbeats (muestreo)
-		db.prepare(
-			`
-      CREATE TABLE IF NOT EXISTS heartbeats (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        device_id TEXT NOT NULL,
-        battery_level INTEGER NOT NULL,
-        charging INTEGER NOT NULL DEFAULT 0,
-        timestamp INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `
-		).run();
-
 		// ============ ÍNDICES PARA PERFORMANCE ============
 
 		// Índices para alarm_events
@@ -121,47 +79,6 @@ export function initializeDatabase() {
     `
 		).run();
 
-		// Índices para battery_alerts
-		db.prepare(
-			`
-      CREATE INDEX IF NOT EXISTS idx_battery_device_time 
-      ON battery_alerts(device_id, timestamp)
-    `
-		).run();
-
-		db.prepare(
-			`
-      CREATE INDEX IF NOT EXISTS idx_battery_timestamp 
-      ON battery_alerts(timestamp)
-    `
-		).run();
-
-		// Índices para offline_events
-		db.prepare(
-			`
-      CREATE INDEX IF NOT EXISTS idx_offline_device 
-      ON offline_events(device_id, start_time)
-    `
-		).run();
-
-		db.prepare(
-			`
-      CREATE INDEX IF NOT EXISTS idx_offline_open 
-      ON offline_events(device_id, end_time) 
-      WHERE end_time IS NULL
-    `
-		).run();
-
-		// Índices para heartbeats
-		db.prepare(
-			`
-      CREATE INDEX IF NOT EXISTS idx_heartbeat_device_time 
-      ON heartbeats(device_id, timestamp)
-    `
-		).run();
-
-		Logger.info('[DB] Tablas e índices creados correctamente');
-
 		// Mostrar estadísticas de la base de datos
 		showDatabaseStats();
 	} catch (error) {
@@ -175,7 +92,7 @@ export function initializeDatabase() {
  */
 function showDatabaseStats() {
 	try {
-		const tables = ['users', 'alarm_events', 'battery_alerts', 'offline_events', 'heartbeats'];
+		const tables = ['users', 'alarm_events'];
 
 		Logger.info('[DB] Estadísticas de tablas:');
 
@@ -198,17 +115,9 @@ export function cleanupOldMetrics(daysToKeep: number = 90) {
 	try {
 		const transaction = db.transaction(() => {
 			const alarms = db.prepare('DELETE FROM alarm_events WHERE timestamp < ?').run(cutoffTime);
-			const battery = db.prepare('DELETE FROM battery_alerts WHERE timestamp < ?').run(cutoffTime);
-			const heartbeats = db.prepare('DELETE FROM heartbeats WHERE timestamp < ?').run(cutoffTime);
-			const offline = db
-				.prepare('DELETE FROM offline_events WHERE start_time < ? AND end_time IS NOT NULL')
-				.run(cutoffTime);
 
 			Logger.info(`[DB] Limpieza de datos antiguos (>${daysToKeep} días):`);
 			Logger.info(`  - Alarmas eliminadas: ${alarms.changes}`);
-			Logger.info(`  - Alertas batería eliminadas: ${battery.changes}`);
-			Logger.info(`  - Heartbeats eliminados: ${heartbeats.changes}`);
-			Logger.info(`  - Eventos offline cerrados eliminados: ${offline.changes}`);
 		});
 
 		transaction();

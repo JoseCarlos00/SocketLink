@@ -98,39 +98,6 @@ export class DeviceStatusManager {
 	}
 
 	// ============ GESTIÓN DE ESTADO EN TIEMPO REAL ============
-
-	updateFromHeartbeat(deviceId: string, battery: number, charging: boolean) {
-		const now = Date.now();
-		let device = this.devices.get(deviceId);
-
-		if (!device) {
-			// Dispositivo nuevo conectándose
-			device = { deviceId, online: true, battery, charging, lastSeen: now };
-			this.devices.set(deviceId, device);
-
-			// Emitir solo si el dispositivo está en devicesMappingCache (existe en DB)
-			if (this.isDeviceInCache(deviceId)) {
-				this.emitToWeb('device:connected', { deviceId, battery, charging, timestamp: now });
-			}
-			return;
-		}
-
-		const wasOffline = !device.online;
-		const batteryChanged = Math.abs(device.battery - battery) >= 5;
-		const chargingChanged = device.charging !== charging;
-
-		device.online = true;
-		device.battery = battery;
-		device.charging = charging;
-		device.lastSeen = now;
-
-		if (wasOffline) {
-			this.emitToWeb('device:reconnected', { deviceId, battery, charging, timestamp: now });
-		} else if (batteryChanged || chargingChanged) {
-			this.emitToWeb('device:battery:update', { deviceId, battery, charging, timestamp: now });
-		}
-	}
-
 	markAsDisconnected(deviceId: string) {
 		const device = this.devices.get(deviceId);
 		if (device && device.online) {
