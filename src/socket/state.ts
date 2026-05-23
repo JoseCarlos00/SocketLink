@@ -17,6 +17,7 @@ let lastKnownTimestamp: string | undefined;
 export async function loadAndSetCache() {
 	try {
 		logger.info('Iniciando carga de la caché de inventario desde Google Sheets...');
+		deviceStatusManager.cleanDeviceMappingCache();
 		
 		const data = await getCriticalMappingData(SPREAD_SHEET_ID);
 		

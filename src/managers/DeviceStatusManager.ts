@@ -47,6 +47,11 @@ export class DeviceStatusManager {
 		return Array.from(this.devicesMappingCache.values());
 	}
 
+	public cleanDeviceMappingCache(): void {
+		this.devicesMappingCache.clear();
+	}
+
+
 	// ============ MÉTODO PRINCIPAL PARA EL FRONTEND ============
 
 	/**
@@ -215,33 +220,3 @@ export class DeviceStatusManager {
 }
 
 export const deviceStatusManager = new DeviceStatusManager();
-
-// EJEMPLO DE USO:
-
-// // Cuando creas un dispositivo nuevo en tu API
-// export async function createDevice(deviceData: CreateDeviceInput) {
-//   const newDevice = await db.insert(devices).values(deviceData);
-
-//   // Notificar a todos los clientes web que deben refrescar
-//   deviceStatusManager.emitDataModified('new device created');
-
-//   return newDevice;
-// }
-
-// // Cuando actualizas un dispositivo
-// export async function updateDevice(deviceId: string, updates: UpdateDeviceInput) {
-//   const updated = await db.update(devices)
-//     .set(updates)
-//     .where(eq(devices.id, deviceId));
-
-//   deviceStatusManager.emitDataModified(`device ${deviceId} updated`);
-
-//   return updated;
-// }
-
-// // Cuando eliminas un dispositivo
-// export async function deleteDevice(deviceId: string) {
-//   await db.delete(devices).where(eq(devices.id, deviceId));
-
-//   deviceStatusManager.emitDataModified(`device ${deviceId} deleted`);
-// }

@@ -8,15 +8,20 @@ dotenv.config();
 function getEnvVar(key: string): string {
 	const value = process.env[key];
 	if (!value) {
-		throw new Error(`Missing required environment variable: ${key}`);
+		console.error(`\x1b[31m[Config Error] Missing required environment variable: ${key}\x1b[0m`);
+		process.exit(1);
 	}
 	return value;
+}
+
+function getOptionalEnvVar(key: string, defaultValue: string): string {
+	return process.env[key] || defaultValue;
 }
 
 const allowedOrigins = [
 	'http://localhost:5173',
 	'http://192.168.15.189:5173',
-	'http://192.168.1.6:5173',
+	'http://192.168.1.8:5173',
 ];
 
 export const config = {
@@ -24,10 +29,10 @@ export const config = {
 	JWT_REFRESH_SECRET: getEnvVar('JWT_REFRESH_SECRET'),
 	ACCESS_TOKEN_EXPIRE: getEnvVar('ACCESS_TOKEN_EXPIRE'),
 	REFRESH_TOKEN_EXPIRE: getEnvVar('REFRESH_TOKEN_EXPIRE'),
-	PORT: getEnvVar('PORT') || 3000,
+	PORT: parseInt(getOptionalEnvVar('PORT', '3000'), 10),
 	CORS_ORIGIN: allowedOrigins,
 	API_SECRET_TOKEN: getEnvVar('API_SECRET_TOKEN'),
-	NODE_ENV: process.env.NODE_ENV || 'development',
+	NODE_ENV: getOptionalEnvVar('NODE_ENV', 'development'),
 
 
 	// Nombre del archivo de la base de datos SQLite
@@ -56,4 +61,12 @@ const relativePath = config.NODE_ENV === 'production' ? '../../' : '../';
 
 const serviceAccountPath = path.resolve(__dirname, relativePath, 'data', 'service-account.json');
 
-export const SERVICE_ACCOUNT: ServiceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+let serviceAccountData: ServiceAccount;
+try {
+	serviceAccountData = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
+} catch (error) {
+	console.error(`\x1b[31m[Config Error] Failed to load service account from ${serviceAccountPath}: ${error instanceof Error ? error.message : error}\x1b[0m`);
+	process.exit(1);
+}
+
+export const SERVICE_ACCOUNT = serviceAccountData;
