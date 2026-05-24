@@ -17,7 +17,6 @@ import type {
 	GetDeviceInfoAck,
 	MessageAck,
 	MessagePayload,
-	PingAck,
 	MaintenanceModeAck,
 	MaintenanceModePayload,
 	CheckForUpdateAck,
@@ -29,7 +28,7 @@ export interface ServerToClientEvents {
 	// Android
 	[serverToAppEvents.ALARM_ACTIVATE]: (payload?: AlarmPayload, ack: AlarmAck) => void;
 
-	[serverToAppEvents.PING]: (payload: null, ack: PingAck) => void;
+	[serverToAppEvents.PING]: (payload: null) => void;
 
 	[serverToAppEvents.MESSAGE_RECEIVE]: (payload: MessagePayload, ack: MessageAck) => void;
 
@@ -46,6 +45,9 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
 	// Android
 	[appToServerEvents.REGISTER_DEVICE]: (payload: RegisterDevicePayload, ack: RegisterDeviceAck) => void;
+
+	[appToServerEvents.PONG]: (payload: { status: string }) => void;
+
 
 	// Web
 	[receivedEventWeb.IDENTIFY_CLIENT]: (payload: IdentifyClientPayload) => void;

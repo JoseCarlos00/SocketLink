@@ -1,5 +1,5 @@
 import type { AppIO, AppSocket } from '../../types/socketInterface.d.ts';
-import { roomsName, serverToAppEvents , clientType } from '../../constants.js';
+import { roomsName, serverToAppEvents, appToServerEvents, clientType } from '../../constants.js';
 import { webLogger as logger } from '../../services/logger.js';
 import { activeConnections } from '../state.js';
 import type {
@@ -48,8 +48,6 @@ export function handleAlarm(io: AppIO, data: AlarmActivationPayload, callback: W
 					return;
 				}
 				const response = responses[0]; // La respuesta real está en un array
-				console.log(response);
-				
 				callback({ status: response?.status || 'OK', message: 'Alarm respondido: Alarma enviada.' });
 			});
 
@@ -72,6 +70,7 @@ export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback:
 
 	if (activeConnections.has(target_device_id)) {
 		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.MESSAGE_RECEIVE, dataMessage, (err, responses) => {
+
 			if (err) {
 				logger.error(`Error en ${serverToAppEvents.MESSAGE_RECEIVE}: El dispositivo ${target_device_id} no respondió (timeout).`);
 				callback({ status: 'ERROR', message: 'Message respondido: El dispositivo no respondió a tiempo.' });
@@ -79,6 +78,7 @@ export function handleSendMessage(io: AppIO, data: SendMessagePayload, callback:
 			}
 
 			const response = responses[0];
+			
 			callback({ status: response?.status || 'OK', message: 'Message respondido: Mensaje enviado.' });
 		});
 
@@ -97,18 +97,35 @@ export function handlePingAlarm(io: AppIO, data: TargetedDevicePayload, callback
 		return callback({ status: 'ERROR', message: 'Ping respondido: Falta el ID del dispositivo de destino.' });
 	}
 
-	if (activeConnections.has(target_device_id)) {
-		io.to(target_device_id).timeout(15000).emit(serverToAppEvents.PING, null, (err, responses) => {
-			if (err) {
-				logger.error(`Error en ${serverToAppEvents.PING}: El dispositivo ${target_device_id} no respondió (timeout).`);
-				callback({ status: 'ERROR', message: 'Ping respondido: El dispositivo no respondió a tiempo.' });
-				return;
-			}
-			const response = responses[0];
-			callback({ status: 'OK', message: `Ping respondido: ${response?.status}` });
-		});
+	const deviceSocketId = activeConnections.get(target_device_id);
+	const deviceSocket = deviceSocketId ? io.sockets.sockets.get(deviceSocketId) : null;
 
-		logger.info(`Evento ${serverToAppEvents.PING} enviado a: ${target_device_id}`);
+	if (deviceSocket) {
+		let isResolved = false;
+
+		// 1. Escuchar el evento PONG que enviará el dispositivo después de sus 3s de delay
+		const handlePong = (payload: { status: string }) => {
+			if (isResolved) return;
+			isResolved = true;
+			clearTimeout(timeout);
+			callback({ status: 'OK', message: `Ping respondido: ${payload.status}` });
+		};
+
+		deviceSocket.once(appToServerEvents.PONG, handlePong);
+
+		// 2. Timeout de seguridad por si el dispositivo se desconecta o falla
+		const timeout = setTimeout(() => {
+			if (isResolved) return;
+			isResolved = true;
+			deviceSocket.off(appToServerEvents.PONG, handlePong);
+			logger.warn(`Timeout esperando PONG de ${target_device_id}`);
+			callback({ status: 'ERROR', message: 'Ping respondido: El dispositivo no envió PONG a tiempo.' });
+		}, 10000); // 10 segundos de espera máxima (3s de delay + margen)
+
+		// 3. Emitir el PING al dispositivo (ahora sin callback de ack)
+		deviceSocket.emit(serverToAppEvents.PING, null);
+		
+		logger.info(`Evento ${serverToAppEvents.PING} enviado a: ${target_device_id}. Esperando PONG asíncrono...`);
 	} else {
 		logger.error(`Error en handlePingAlarm: Dispositivo ${target_device_id} no encontrado o desconectado.`);
 		callback({ status: 'ERROR', message: `Ping respondido: Dispositivo ${target_device_id} desconectado.` });
@@ -162,7 +179,6 @@ export function handleGetDeviceInfo(io: AppIO, data: TargetedDevicePayload, call
 			}
 
 			const deviceInfo = responses[0]; // responses es un array, tomamos el primer elemento.
-			console.log(deviceInfo);
 			
 			if (deviceInfo?.androidId) {
 				callback({

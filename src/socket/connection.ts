@@ -24,6 +24,10 @@ function registerDeviceEventHandlers(socket: AppSocket) {
 	socket.on(appToServerEvents.REGISTER_DEVICE, (data, ack) => {
 		handleDeviceRegistration(socket, data, ack);
 	});
+
+	socket.on(appToServerEvents.PONG, (payload) => {
+		socketLogger.debug(`[Device] PONG recibido de ${socket.data.deviceId}: ${payload?.status}`);
+	});
 }
 
 function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
