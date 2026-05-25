@@ -7,8 +7,8 @@ import { adminLogger as logger } from '../services/logger.js';
 import { config } from '../config.js';
 import { REFRESH_TOKEN_COOKIE_NAME, ACCESS_TOKEN_COOKIE_NAME} from "../constants.js";
 
-const timeExpireAccessToken = 1 * 60 * 1000; // 15 minutos
-const timeExpireRefreshToken = 7 * 24 * 60 * 60 * 1000; // 7 días
+const timeExpireAccessToken = 15 * 60 * 1000;
+const timeExpireRefreshToken = 7 * 24 * 60 * 60 * 1000;
 
 
 export const login = async (req: Request, res: Response) => {
