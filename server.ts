@@ -103,7 +103,7 @@ app.use('/status', ((_, res) => {
 }))
 app.use('/api/auth', authApiRoutes);
 app.use('/api/inventory', verifyToken, inventoryApiRoutes);
-app.use('/api/reports',verifyToken, checkSuperAdminRole, reportsRoutes);
+app.use('/api/reports',verifyToken, reportsRoutes);
 app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

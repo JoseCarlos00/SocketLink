@@ -72,13 +72,10 @@ router.get('/summary', (req, res) => {
 
 /**E
  * POST /api/reports/cleanup
- * Limpia datos antiguos (requiere autenticación ADMIN)
+ * Limpia datos antiguos
  */
 router.post('/cleanup', (req, res) => {
 	try {
-		// TODO: Agregar middleware de autenticación aquí
-		// if (req.user.role !== 'ADMIN') return res.status(403).json({...})
-
 		const daysToKeep = parseInt(req.body.daysToKeep) || 90;
 		metricsManager.cleanOldData(daysToKeep);
 
