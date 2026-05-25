@@ -38,7 +38,9 @@ function registerWebClientEventHandlers(socket: AppSocket, io: AppIO) {
 
 
 	const verifyAdminRole = (cb: WebCallback): boolean => {
-		if (socket.currentUser?.role !== 'ADMIN') {
+		const allowedRoles = ['ADMIN', 'SUPER_ADMIN'];
+
+		if (!socket.currentUser?.role || !allowedRoles.includes(socket.currentUser?.role)) {
 			cb?.({ status: 'FORBIDDEN', message: 'Acceso denegado: solo para administradores.' });
 			return true;
 		}
