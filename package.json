@@ -5,8 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc",
-		"start": "node dist/server.js",
-		"dev": "node --loader ts-node/esm server.ts",
+		"start": "cross-env NODE_ENV=production node dist/server.js",
+		"dev": "cross-env NODE_ENV=development node --loader ts-node/esm server.ts",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Jose Carlos Aguirre Romero",
@@ -39,6 +39,7 @@
 		"@types/socket.io-client": "^1.4.36",
 		"@types/swagger-jsdoc": "^6.0.4",
 		"@types/swagger-ui-express": "^4.1.8",
+		"cross-env": "^10.1.0",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
 		"vite-plugin-checker": "^0.11.0"
