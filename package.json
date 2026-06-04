@@ -1,6 +1,9 @@
 {
 	"name": "socket-link",
 	"version": "1.0.0",
+	"engines": {
+  "node": "20.x"
+	},
 	"main": "dist/server.js",
 	"type": "module",
 	"scripts": {
