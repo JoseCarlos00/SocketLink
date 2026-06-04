@@ -28,6 +28,7 @@ export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, cal
 				}
 
 				const response = responses[0];
+				console.log(`Respuesta recibida de ${target_device_id}:`, response);
 
 				callback({
 					status: response?.status || 'OK',
@@ -51,6 +52,8 @@ export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 	// Validamos si la sala existe y si tiene al menos un miembro.
 	if (androidClientsRoom && androidClientsRoom.size > 0) {
 		io.to(roomsName.ANDROID_APP).timeout(15000).emit(serverToAppEvents.CHECK_FOR_UPDATE, null, (err, responses) => {
+			  console.log('Respuesta recibida de un dispositivo:', responses);
+
 			if (err) {
 				// Este error se activa si NINGÚN cliente responde.
 				logger.error(`Error en ${serverToAppEvents.CHECK_FOR_UPDATE} a la sala: Ningún dispositivo respondió a tiempo.`);
@@ -61,7 +64,6 @@ export function handleCheckForAllUpdate(io: AppIO, callback: WebCallback) {
 			logger.info(`Evento ${serverToAppEvents.CHECK_FOR_UPDATE} enviado a ${androidClientsRoom.size} dispositivo(s) en la sala '${roomsName.ANDROID_APP}'.`);
 
       const response = responses[0];
-      console.log('Respuesta recibida de un dispositivo:', response);
       
       callback({
 				status: response?.status || 'OK',
