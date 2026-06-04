@@ -8,14 +8,13 @@ import {
 
 import {
 	handleAlarm,
-	handleCheckForAllUpdate,
-	handleCheckForUpdate,
 	handleGetDeviceInfo,
 	handlePingAlarm,
-	handleSendAllMessage,
-	handleSendMessage,
 	handleWebClientIdentification,
-} from './handlers/webHandler.js';
+} from './handlers/web/webHandler.js';
+
+import { handleCheckForUpdate, handleCheckForAllUpdate } from './handlers/web/checkForUpdate.handler.js';
+import { handleSendMessage, handleSendAllMessage } from './handlers/web/sendMessage.handler.js';
 
 import type { WebCallback } from '../types/payloadsGetWeb.d.ts'
 import { handleSetMaintenanceMode } from './handlers/maintenance.handler.js'
