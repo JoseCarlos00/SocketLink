@@ -47,8 +47,10 @@ export function handleSendAllMessage(io: AppIO, payload: SendAllMessagePayload, 
 		io.to(roomsName.ANDROID_APP)
 			.timeout(15000)
 			.emit(serverToAppEvents.MESSAGE_RECEIVE, payload.dataMessage, (err, responses) => {
-				if (err) {
-					// Este error se activa si NINGÚN cliente responde.
+				const responsesCount = responses?.length || 0;
+
+				// Si hay error pero tenemos respuestas, no es un fallo total de comunicación
+				if (err && responsesCount === 0) {
 					logger.error(
 						`Error en ${serverToAppEvents.MESSAGE_RECEIVE} a la sala: Ningún dispositivo respondió a tiempo.`,
 					);
@@ -56,12 +58,17 @@ export function handleSendAllMessage(io: AppIO, payload: SendAllMessagePayload, 
 					return;
 				}
 
-				// responses es un array con las respuestas de los clientes que sí contestaron.
-				const successfulResponses = responses.filter((r) => r?.status !== 'ERROR');
+				logger.info(
+					`Evento ${serverToAppEvents.MESSAGE_RECEIVE} procesado por ${responsesCount} de ${androidClientsRoom.size} dispositivo(s).`,
+				);
+
+				// Si hubo timeout pero tenemos respuestas, el estado general es OK o WARN (parcial)
+				const overallStatus = responsesCount < androidClientsRoom.size ? 'OK' : 'OK';
+				// Nota: Podrías usar 'WARN' si quieres que la web sepa que no todos respondieron.
 
 				callback({
-					status: 'OK',
-					message: `Mensaje procesado por ${successfulResponses.length} de ${androidClientsRoom.size} dispositivos.`,
+					status: overallStatus,
+					message: `Mensajes enviados por ${responsesCount} dispositivo(s).`,
 				});
 			});
 
