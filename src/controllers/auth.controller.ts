@@ -43,13 +43,13 @@ export const login = async (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(payload);
 		const refreshToken = generateRefreshToken(payload);
 
-		const isProduction = config.NODE_ENV === 'production';
+		const isProduction = false; // Se ejecutara en un entrono local -> config.NODE_ENV === 'production';
 
 		res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: isProduction,
-			maxAge: timeExpireRefreshToken
+			maxAge: timeExpireRefreshToken,
 		});
 
 		// Cookie para el Access Token (accesible por el servidor de Next.js)
@@ -62,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
 
 		// Es mejor no devolver el payload en la respuesta. El cliente puede decodificar el accessToken si lo necesita.
 		logger.info(`Inicio de sesión exitoso para el usuario: ${username}`);
-		res.json({ user: payload , message: 'Inicio de sesión exitoso' });
+		res.json({ user: payload, message: 'Inicio de sesión exitoso' });
 	} catch (error) {
 		logger.error(`Error en el proceso de login para ${username}: ${error}`);
 		res.status(500).json({ message: 'Error interno del servidor' });
@@ -91,7 +91,7 @@ export const refreshToken = (req: Request, res: Response) => {
 		const accessToken = generateAccessToken(newPayload);
 		const newRefreshToken = generateRefreshToken(newPayload);
 
-		const isProduction = config.NODE_ENV === 'production';
+		const isProduction = false; // Se ejecutara en un entrono local -> config.NODE_ENV === 'production';
 
 		// 4. Actualizar ambas cookies, igual que en el login.
 		res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, {
@@ -118,7 +118,7 @@ export const refreshToken = (req: Request, res: Response) => {
 
 export const logout = (_req: Request, res: Response) => {
 	try {
-		const isProduction = config.NODE_ENV === 'production';
+		const isProduction = false; // Se ejecutara en un entrono local -> config.NODE_ENV === 'production';
 
 		// Limpiar la cookie del refresh token
 		res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
