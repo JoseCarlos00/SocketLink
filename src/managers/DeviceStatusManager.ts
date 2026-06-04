@@ -6,18 +6,11 @@ import type { Devices } from '../types/inventory.d.ts';
 interface DeviceStatus {
 	deviceId: string;
 	online: boolean;
-	battery: number;
-	charging: boolean;
-	lastSeen: number;
 }
 
 // Interfaz combinada para el frontend
 export interface DeviceWithStatus extends Devices {
 	online: boolean;
-	battery?: number;
-	charging?: boolean;
-	lastSeen?: number;
-	timeSinceLastSeen?: number;
 }
 
 export class DeviceStatusManager {
@@ -51,12 +44,10 @@ export class DeviceStatusManager {
 		this.devicesMappingCache.clear();
 	}
 
-
 	// ============ MÉTODO PRINCIPAL PARA EL FRONTEND ============
 
 	/**
 	 * Combina devicesMappingCache (DB) con devices (estado en tiempo real)
-	 * Este es el método que debes llamar desde tu API
 	 */
 	public getAllDevicesWithStatus(): DeviceWithStatus[] {
 		const devicesList: DeviceWithStatus[] = [];
@@ -67,14 +58,8 @@ export class DeviceStatusManager {
 			const status = androidId ? this.devices.get(androidId) : undefined;
 
 			devicesList.push({
-				// Datos de la DB
 				...device,
-				// Estado en tiempo real
 				online: status?.online ?? false,
-				battery: status?.battery,
-				charging: status?.charging,
-				lastSeen: status?.lastSeen,
-				timeSinceLastSeen: status?.lastSeen ? Date.now() - status.lastSeen : undefined,
 			});
 		}
 
@@ -90,56 +75,50 @@ export class DeviceStatusManager {
 
 		if (!device) return undefined;
 
-		const status = this.devices.get(androidId);
+		const status = androidId ? this.devices.get(androidId) : undefined;
 
 		return {
 			...device,
 			online: status?.online ?? false,
-			battery: status?.battery,
-			charging: status?.charging,
-			lastSeen: status?.lastSeen,
-			timeSinceLastSeen: status?.lastSeen ? Date.now() - status.lastSeen : undefined,
 		};
 	}
 
 	// ============ GESTIÓN DE ESTADO EN TIEMPO REAL ============
 	markAsDisconnected(deviceId: string) {
 		const device = this.devices.get(deviceId);
+
 		if (device && device.online) {
 			device.online = false;
+			
 			this.emitToWeb('device:disconnected', {
 				deviceId,
-				lastSeen: device.lastSeen,
-				timestamp: Date.now(),
 			});
+
 			socketLogger.warn(`[DeviceStatus] ${deviceId} marcado como desconectado`);
 		}
 	}
 
 	markAsOnline(deviceId: string) {
-		const device = this.devices.get(deviceId);
+		let device = this.devices.get(deviceId);
 
-		if (device && !device.online) {
-			device.online = true;
-			this.emitToWeb('device:reconnected', {
+		// Si el dispositivo no existe en el mapa de estado (ej: registro nuevo post-inicio), lo creamos
+		if (!device) {
+			device = {
 				deviceId,
-				battery: device.battery,
-				charging: device.charging,
-				timestamp: Date.now(),
-			});
+				online: false,
+			};
+
+			this.devices.set(deviceId, device);
+		}
+
+		if (!device.online) {
+			device.online = true;
+
+			this.emitToWeb('device:connected', { deviceId });
+			
+
 			socketLogger.info(`[DeviceStatus] ${deviceId} marcado como online`);
 		}
-	}
-
-	getAllDevicesStatus() {
-		return Array.from(this.devices.values()).map((d) => ({
-			deviceId: d.deviceId,
-			online: d.online,
-			battery: d.battery,
-			charging: d.charging,
-			lastSeen: d.lastSeen,
-			timeSinceLastSeen: Date.now() - d.lastSeen,
-		}));
 	}
 
 	// ============ EMISIÓN DE EVENTOS ============
@@ -159,7 +138,7 @@ export class DeviceStatusManager {
 
 		const webCLientRoom = this.io.sockets.adapter.rooms.get(roomsName.WEB_CLIENT);
 		if (!webCLientRoom || webCLientRoom.size === 0) {
-			socketLogger.warn('No hay clientes web conectados. No se emitirá el evento.')
+			socketLogger.warn('No hay clientes web conectados. No se emitirá el evento.');
 			return;
 		}
 
@@ -174,47 +153,20 @@ export class DeviceStatusManager {
 	// ============ UTILIDADES ============
 
 	/**
-	 * Verifica si un dispositivo existe en el cache (DB)
-	 */
-	private isDeviceInCache(androidId: string): boolean {
-		return Array.from(this.devicesMappingCache.values()).some((d) => d.androidId === androidId);
-	}
-
-	/**
-	 * Limpia dispositivos del Map de estado que no estén en la DB
-	 * Útil para ejecutar periódicamente
-	 */
-	public cleanupOrphanedDevices() {
-		const validAndroidIds = new Set(
-			Array.from(this.devicesMappingCache.values())
-				.map((d) => d.androidId)
-				.filter(Boolean)
-		);
-
-		for (const [deviceId] of this.devices) {
-			if (!validAndroidIds.has(deviceId)) {
-				this.devices.delete(deviceId);
-				socketLogger.info(`[DeviceStatus] Dispositivo huérfano eliminado: ${deviceId}`);
-			}
-		}
-	}
-
-	/**
 	 * Sincroniza el estado inicial cuando el servidor inicia
 	 * Marca como offline todos los dispositivos de la DB
 	 */
 	public initializeDevicesFromCache() {
 		for (const device of this.devicesMappingCache.values()) {
+
 			if (device.androidId && !this.devices.has(device.androidId)) {
 				this.devices.set(device.androidId, {
 					deviceId: device.androidId,
 					online: false,
-					battery: 0,
-					charging: false,
-					lastSeen: Date.now(),
 				});
 			}
 		}
+		
 		socketLogger.info(`[DeviceStatus] ${this.devices.size} dispositivos inicializados como offline`);
 	}
 }

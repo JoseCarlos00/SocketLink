@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import { adminLogger as logger } from '../services/logger.js';
 import type { User as UserType, UserRole } from '../types/user.d.ts';

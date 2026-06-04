@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/token.js';
 import { User as UserModel, Bcrypt } from '../models/user.model.js';
 import type { User as UserType, AuthPayload } from '../types/user.d.ts';

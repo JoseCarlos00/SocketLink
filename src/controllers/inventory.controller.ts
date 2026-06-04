@@ -1,34 +1,78 @@
-import { activeConnections } from '../socket/state.js';
+import type { Request, Response } from 'express';
 import { inventoryLogger as logger } from '../services/logger.js';
-import { deviceStatusManager } from '../managers/DeviceStatusManager.js'
+import { deviceStatusManager } from '../managers/DeviceStatusManager.js';
 
 /**
  * Obtiene la lista de todos los dispositivos registrados desde la caché.
  * @returns Array de objetos simplificados para la web.
  */
-export function getRegisteredDevicesList(req: any, res: any) {
+export function getAllDeviceList(_: Request, res: Response) {
 	try {
+			const devicesWithStatus = deviceStatusManager.getAllDevicesWithStatus();
+	
+			// Transformar al formato que espera el frontend
+			const devicesList = devicesWithStatus.map((device) => ({
+				id: device.androidId ?? `index-${device.index}`,
+				androidId: device.androidId,
+				equipo: device.equipo,
+				modelo: device.modelo,
+				usuario: device.usuario,
+				correo: device.correo,
+				aliasUsuario: device.aliasUsuario,
+				ipAddress: device.ip,
+				macAddress: device.macAddress,
+			
+				online: device.online,
+			}));
+			
+			res.json({
+				success: true,
+				data: devicesList,
+				timestamp: Date.now(),
+			});
+		} catch (error) {
+			logger.error('[API] Error fetching devices:', error);
+			res.status(500).json({
+				success: false,
+				error: 'Error al obtener dispositivos',
+			});
+		}
+}
 
-		const devices = deviceStatusManager.getAllDevices();
+export function getDeviceById(req: Request, res: Response) {
+	try {
+		const { androidId } = req.params;
+		const device = deviceStatusManager.getDeviceStatusByAndroidId(androidId);
 
-		// Transforma el Map a un array de objetos para la respuesta JSON.
-		const devicesList = devices.map((device) => ({
-			id: device.androidId ?? `index-${device.index}`,
-			androidId: device.androidId,
-			equipo: device.equipo,
-			modelo: device.modelo,
-			usuario: device.usuario,
-			correo: device.correo,
-			aliasUsuario: device.aliasUsuario,
-			ipAddress: device.ip,
-			macAddress: device.macAddress,
-			online: device.androidId ? activeConnections.has(device.androidId) : false,
-		}));
+		if (!device) {
+			return res.status(404).json({
+				success: false,
+				error: 'Dispositivo no encontrado',
+			});
+		}
 
-		logger.info(`Se ha solicitado la lista de inventario. Total de dispositivos en caché: ${devicesList.length}`);
-		res.status(200).json(devicesList);
+		res.json({
+			success: true,
+			data: {
+				id: device.androidId ?? `index-${device.index}`,
+				androidId: device.androidId,
+				equipo: device.equipo,
+				modelo: device.modelo,
+				usuario: device.usuario,
+				correo: device.correo,
+				aliasUsuario: device.aliasUsuario,
+				ipAddress: device.ip,
+				macAddress: device.macAddress,
+
+				online: device.online,
+			},
+			timestamp: Date.now(),
+		});
 	} catch (error) {
-		logger.error(`Error al obtener la lista de dispositivos del inventario: ${error}`);
-		res.status(500).json({ message: 'Error interno del servidor' });
-  }
+		logger.error('[API] Error fetching device:', error);
+		res.status(500).json({
+			success: false,
+			error: 'Error al obtener dispositivo',
+		});
+	}
 }

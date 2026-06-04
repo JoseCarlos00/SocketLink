@@ -151,7 +151,7 @@ export function handleCheckForUpdate(io: AppIO, data: TargetedDevicePayload, cal
 			}
 
 			const response = responses[0];
-			console.log(response, responses);
+			
 			
 			callback({ status: 'OK', message: 'Check update respondido: Solicitud de búsqueda de actualización enviada.' });
 		})
