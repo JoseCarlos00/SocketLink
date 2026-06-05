@@ -1,5 +1,6 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
 import { Server as SocketIOServer } from 'socket.io';
 import swaggerUi from 'swagger-ui-express'
 import cors from 'cors';
@@ -7,7 +8,7 @@ import cookieParser from 'cookie-parser';
 
 import Logger from './src/services/logger.js';
 import swaggerSpec  from './src/swagger.js';
-import { config } from './src/config.js'; 
+import { config, __dirname } from './src/config.js'; 
 import { loadAndSetCache, startSheetsPolling } from './src/socket/state.js';
 import { initializeDatabase } from './src/database/connection.js'
 import { initializeSocketLogic } from './src/socket/connection.js';
@@ -37,14 +38,18 @@ function configureApp(): express.Application {
 	const app = express();
 	// Configura el middleware de CORS para todas las rutas HTTP
 	app.use(
-		cors({ // Ahora usa la configuración centralizada
+		cors({
 			origin: config.CORS_ORIGIN,
 			credentials: true, // Permite el envío de cookies (útil para /auth/refresh)
-		})
+		}),
 	);
 
 	app.use(express.json());
 	app.use(cookieParser());
+
+	// Sirve los estáticos del frontend
+	const frontendPath = path.join(__dirname, '..', 'public');
+	app.use(express.static(frontendPath));
 
 	app.use((req, res, next) => {
 		Logger.http(`Request: ${req.method} ${req.originalUrl}`, { ip: req.ip });
@@ -90,23 +95,20 @@ deviceStatusManager.setIO(io);
 io.use(socketAuthMiddleware);
 
 // Routes
-app.get('/', (req, res) => {
-  res.status(200).json({ 
-    service: 'AlertScannerService API', 
-    status: 'Running',
-    version: '1.0'
-  });
-});
-
 app.use('/status', ((_, res) => {
 	res.status(200).json({ status: 'ACTIVE' });
-}))
+}));
+
 app.use('/api/auth', authApiRoutes);
 app.use('/api/inventory', verifyToken, inventoryApiRoutes);
 app.use('/api/reports',verifyToken, reportsRoutes);
 app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.get('/*path', (_, res) => {
+	res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
 
 initializeSocketLogic(io);
 
