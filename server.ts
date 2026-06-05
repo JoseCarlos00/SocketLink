@@ -30,6 +30,10 @@ import reportsRoutes from './src/api/reports.route.js';
 // 1. Inicializar la base de datos
 initializeDatabase();
 
+// Definir la ruta de estáticos una sola vez para evitar inconsistencias
+const relativePath = config.NODE_ENV === 'production' ? '../..' : '..';
+const frontendPath = path.join(__dirname, relativePath, 'public');
+
 /**
  * Configura y devuelve una instancia de la aplicación Express.
  * @returns {express.Application} La aplicación Express configurada.
@@ -47,8 +51,6 @@ function configureApp(): express.Application {
 	app.use(express.json());
 	app.use(cookieParser());
 
-	// Sirve los estáticos del frontend
-	const frontendPath = path.join(__dirname, '..', 'public');
 	app.use(express.static(frontendPath));
 
 	app.use((req, res, next) => {
@@ -107,7 +109,7 @@ app.use('/api/admin/users', verifyToken, checkSuperAdminRole, usersApiRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/*path', (_, res) => {
-	res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+	res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 initializeSocketLogic(io);
