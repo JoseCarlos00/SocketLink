@@ -2,7 +2,7 @@
 export interface RegisterDevicePayload {
 	androidId: string;
 	ipAddress: string;
-	appVersion: string;
+	appVersion: number;
 }
 
 export interface RegisterDeviceAck {

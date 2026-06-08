@@ -45,7 +45,7 @@ export type CheckForUpdateAck = (response: { status: ResponseSts } | null) => vo
 export interface DeviceInfoResponse {
 	androidId: string;
 	ipAddress: string;
-	appVersion: string;
+	appVersion: number;
 }
 
 // MAINTENANCE MODE

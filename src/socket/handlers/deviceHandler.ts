@@ -7,7 +7,7 @@ import { androidLogger as logger } from '../../services/logger.js'; // Usamos un
 import { deviceStatusManager } from '../../managers/DeviceStatusManager.js'
 
 export async function handleDeviceRegistration(socket: AppSocket, data: RegisterDevicePayload, ack: RegisterDeviceAck) {
-	const { androidId, ipAddress } = data; // androidId es el DEVICE_ID que envía el móvil
+	const { androidId, ipAddress, appVersion } = data; // androidId es el DEVICE_ID que envía el móvil
 	let newRegister = false;
 
 	if (!androidId || !ipAddress) {
@@ -53,7 +53,10 @@ export async function handleDeviceRegistration(socket: AppSocket, data: Register
 	socket.join(androidId); // La room de destino
 	socket.join(roomsName.ANDROID_APP);
 	activeConnections.set(androidId, socket.id); // Registra en Caché B
+
 	deviceStatusManager.markAsOnline(androidId);
+	deviceStatusManager.addAppVersion(androidId, appVersion);
+
 	logger.info(`[REGISTRO] Dispositivo registrado. IP: ${ipAddress}, ID: ${androidId}`);
 	ack?.({ status: 'OK', equipo: deviceData.equipo});
 }

@@ -21,10 +21,11 @@ export function getAllDeviceList(_: Request, res: Response) {
 				aliasUsuario: device.aliasUsuario,
 				ipAddress: device.ip,
 				macAddress: device.macAddress,
-			
+
 				online: device.online,
+				appVersion: device.appVersion,
 			}));
-			
+
 			res.json({
 				success: true,
 				data: devicesList,
@@ -65,6 +66,7 @@ export function getDeviceById(req: Request, res: Response) {
 				macAddress: device.macAddress,
 
 				online: device.online,
+				appVersion: device.appVersion,
 			},
 			timestamp: Date.now(),
 		});

@@ -6,11 +6,13 @@ import type { Devices } from '../types/inventory.d.ts';
 interface DeviceStatus {
 	deviceId: string;
 	online: boolean;
+	appVersion?: number;
 }
 
 // Interfaz combinada para el frontend
 export interface DeviceWithStatus extends Devices {
 	online: boolean;
+	appVersion?: number;
 }
 
 export class DeviceStatusManager {
@@ -55,11 +57,12 @@ export class DeviceStatusManager {
 		// Iterar sobre todos los dispositivos de la DB
 		for (const device of this.devicesMappingCache.values()) {
 			const androidId = device.androidId;
-			const status = androidId ? this.devices.get(androidId) : undefined;
+			const currentDevice = androidId ? this.devices.get(androidId) : undefined;
 
 			devicesList.push({
 				...device,
-				online: status?.online ?? false,
+				online: currentDevice?.online ?? false,
+				appVersion: currentDevice?.appVersion,
 			});
 		}
 
@@ -75,21 +78,22 @@ export class DeviceStatusManager {
 
 		if (!device) return undefined;
 
-		const status = androidId ? this.devices.get(androidId) : undefined;
+		const currentDevice = androidId ? this.devices.get(androidId) : undefined;
 
 		return {
 			...device,
-			online: status?.online ?? false,
+			online: currentDevice?.online ?? false,
+			appVersion: currentDevice?.appVersion,
 		};
 	}
 
 	// ============ GESTIÓN DE ESTADO EN TIEMPO REAL ============
-	markAsDisconnected(deviceId: string) {
+	public markAsDisconnected(deviceId: string) {
 		const device = this.devices.get(deviceId);
 
 		if (device && device.online) {
 			device.online = false;
-			
+
 			this.emitToWeb('device:disconnected', {
 				deviceId,
 			});
@@ -98,7 +102,7 @@ export class DeviceStatusManager {
 		}
 	}
 
-	markAsOnline(deviceId: string) {
+	public markAsOnline(deviceId: string) {
 		let device = this.devices.get(deviceId);
 
 		// Si el dispositivo no existe en el mapa de estado (ej: registro nuevo post-inicio), lo creamos
@@ -115,9 +119,16 @@ export class DeviceStatusManager {
 			device.online = true;
 
 			this.emitToWeb('device:connected', { deviceId });
-			
 
 			socketLogger.info(`[DeviceStatus] ${deviceId} marcado como online`);
+		}
+	}
+
+	public addAppVersion(deviceId: string, version: number) {
+		const device = this.devices.get(deviceId);
+
+		if (device) {
+			device.appVersion = version;
 		}
 	}
 
@@ -158,7 +169,6 @@ export class DeviceStatusManager {
 	 */
 	public initializeDevicesFromCache() {
 		for (const device of this.devicesMappingCache.values()) {
-
 			if (device.androidId && !this.devices.has(device.androidId)) {
 				this.devices.set(device.androidId, {
 					deviceId: device.androidId,
@@ -166,7 +176,7 @@ export class DeviceStatusManager {
 				});
 			}
 		}
-		
+
 		socketLogger.info(`[DeviceStatus] ${this.devices.size} dispositivos inicializados como offline`);
 	}
 }
